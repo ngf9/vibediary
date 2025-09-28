@@ -4,43 +4,19 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import ModernTabNavigation from './ModernTabNavigation';
 import { motion, AnimatePresence } from 'motion/react';
-import FormModal from './FormModal';
 
-interface CohortDate {
-  id: string;
-  courseId: string;
-  startDate: string;
-  title?: string;
-  subtitle?: string;
-  description?: string;
-  isActive: boolean;
-  createdAt?: number;
-}
-
-interface NavigationProps {
-  cohortDates?: CohortDate[];
-}
-
-export default function Navigation({ cohortDates }: NavigationProps) {
+export default function Navigation() {
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isMobileCoursesOpen, setIsMobileCoursesOpen] = useState(false);
+  const [isMobileProjectsOpen, setIsMobileProjectsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
 
   const navigationTabs = [
     { id: 'home', label: 'Home', href: '/' },
-    {
-      id: 'courses',
-      label: 'Courses',
-      href: '#',
-      subItems: [
-        { id: 'ai-fundamentals', label: 'AI for Builders', href: '/ai-fundamentals' },
-        { id: 'vibe-coding', label: 'Vibe Coding Foundations', href: '/vibe-coding' },
-      ]
-    },
+    { id: 'projects', label: 'Projects', href: '/projects' },
+    { id: 'essays', label: 'Essays', href: '/essays' },
     { id: 'about', label: 'About', href: '/about' },
   ];
 
@@ -66,13 +42,13 @@ export default function Navigation({ cohortDates }: NavigationProps) {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 px-4 md:px-8 py-4 md:py-6 bg-white bg-opacity-90 backdrop-blur-sm">
+      <nav className="fixed top-0 left-0 right-0 z-50 px-8 md:px-12 lg:px-16 py-4 md:py-6 bg-white bg-opacity-90 backdrop-blur-sm">
         <div className="flex items-center justify-between max-w-screen-2xl mx-auto">
           <div 
             className="text-xl font-bold text-black cursor-pointer"
             onClick={() => router.push('/')}
           >
-            AI Study Camp
+            Diary of a Vibe Coder
           </div>
           
           {/* Desktop Navigation */}
@@ -83,11 +59,6 @@ export default function Navigation({ cohortDates }: NavigationProps) {
               setIsDropdownOpen={setIsDropdownOpen}
               dropdownRef={dropdownRef}
             />
-            <button
-              onClick={() => setIsFormOpen(true)}
-              className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-full transition-all duration-300 shadow-lg shadow-purple-600/20 hover:shadow-xl hover:shadow-purple-600/30 hover:scale-105 border border-purple-500/20">
-              Apply Now
-            </button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -123,12 +94,12 @@ export default function Navigation({ cohortDates }: NavigationProps) {
                     {tab.subItems ? (
                       <>
                         <button
-                          onClick={() => setIsMobileCoursesOpen(!isMobileCoursesOpen)}
+                          onClick={() => setIsMobileProjectsOpen(!isMobileProjectsOpen)}
                           className="w-full text-left px-4 py-3 hover:bg-gray-50 rounded-lg transition-colors text-gray-800 flex items-center justify-between"
                         >
                           <span>{tab.label}</span>
                           <svg
-                            className={`w-4 h-4 transition-transform ${isMobileCoursesOpen ? 'rotate-180' : ''}`}
+                            className={`w-4 h-4 transition-transform ${isMobileProjectsOpen ? 'rotate-180' : ''}`}
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -137,7 +108,7 @@ export default function Navigation({ cohortDates }: NavigationProps) {
                           </svg>
                         </button>
                         <AnimatePresence>
-                          {isMobileCoursesOpen && (
+                          {isMobileProjectsOpen && (
                             <motion.ul
                               initial={{ height: 0, opacity: 0 }}
                               animate={{ height: 'auto', opacity: 1 }}
@@ -169,26 +140,10 @@ export default function Navigation({ cohortDates }: NavigationProps) {
                   </li>
                 ))}
               </ul>
-              <div className="mt-4 pt-4 border-t border-gray-200">
-                <div className="flex justify-center">
-                  <button 
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      setIsFormOpen(true);
-                    }}
-                    className="px-8 py-3.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-full transition-all duration-300 shadow-lg shadow-purple-600/20 hover:shadow-xl hover:shadow-purple-600/30 hover:scale-105 border border-purple-500/20"
-                  >
-                    Apply Now
-                  </button>
-                </div>
-              </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Form Modal */}
-      <FormModal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} cohortDates={cohortDates} />
     </>
   );
 }

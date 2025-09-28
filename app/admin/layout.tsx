@@ -52,7 +52,7 @@ function EmailStep({ onSendEmail }: { onSendEmail: (email: string) => void }) {
     >
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="text-center">
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2">Admin Access</h2>
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2">Portfolio Admin</h2>
           <p className="text-gray-600 font-light">Enter your email to receive a verification code</p>
         </div>
 
@@ -182,7 +182,7 @@ function AdminHeader() {
   return (
     <header className="bg-gradient-to-br from-white to-gray-50 border-b border-gray-100 px-8 py-4 shadow-sm">
       <div className="mb-2">
-        <h1 className="text-lg font-bold text-gray-900">AI Study Camp | Admin Dashboard</h1>
+        <h1 className="text-lg font-bold text-gray-900">Diary of a Vibe Coder | Admin</h1>
       </div>
       <div className="flex justify-between items-center">
         <div>

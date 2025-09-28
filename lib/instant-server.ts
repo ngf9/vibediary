@@ -106,38 +106,3 @@ export async function getAboutPageContent() {
   return data.aboutPageContent?.[0] || null;
 }
 
-// Fetch Our Story statistics
-export async function getOurStoryStats() {
-  const data = await adminDb.query({
-    ourStoryStats: {
-      $: {
-        where: {
-          isActive: true
-        },
-        order: {
-          sortOrder: 'asc'
-        }
-      }
-    }
-  });
-
-  return data.ourStoryStats || [];
-}
-
-// Fetch Why It Works features
-export async function getWhyItWorksFeatures() {
-  const data = await adminDb.query({
-    whyItWorks: {
-      $: {
-        where: {
-          isActive: true
-        },
-        order: {
-          sortOrder: 'asc'
-        }
-      }
-    }
-  });
-
-  return data.whyItWorks || [];
-}

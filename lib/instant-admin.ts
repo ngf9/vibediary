@@ -1,5 +1,5 @@
 import { init } from '@instantdb/admin';
-import schema from '@/instant.schema';
+import schema from '@/instant.schema.portfolio';
 
 // Initialize the admin SDK for server-side usage
 const adminToken = process.env.INSTANT_ADMIN_TOKEN!;

@@ -2,204 +2,181 @@
 
 import React, { useState, useEffect } from 'react';
 import { db } from '@/lib/instant';
+import { id } from '@instantdb/react';
 import { motion } from 'framer-motion';
 
 export default function AdminAboutPage() {
-  const [activeTab, setActiveTab] = useState<'philosophy' | 'milestones' | 'team'>('philosophy');
+  const [activeTab, setActiveTab] = useState<'bio' | 'journey' | 'skills' | 'contact'>('bio');
   const [status, setStatus] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // Philosophy fields
-  const [philosophyItems, setPhilosophyItems] = useState<string[]>([]);
-  const [newPhilosophyItem, setNewPhilosophyItem] = useState('');
+  // Bio fields
+  const [bio, setBio] = useState('');
+  const [currentFocus, setCurrentFocus] = useState('');
 
-  // Milestone fields
-  const [milestones, setMilestones] = useState<Array<{
+  // Journey fields (milestones)
+  const [journey, setJourney] = useState<Array<{
     id: string;
     title: string;
     date: string;
     description: string;
   }>>([]);
 
-  // Team fields
-  const [teamMembers, setTeamMembers] = useState<Array<{
-    id: string;
-    name: string;
-    role: string;
-    bio: string;
-    image?: string;
-  }>>([]);
+  // Skills fields
+  const [skills, setSkills] = useState<string[]>([]);
+  const [newSkill, setNewSkill] = useState('');
 
-  // Fetch current about page content
+  // Contact fields
+  const [contact, setContact] = useState({
+    email: '',
+    github: '',
+    linkedin: '',
+    twitter: '',
+    website: ''
+  });
+
+  // Fetch current about content
   const { data: aboutData } = db.useQuery({
-    aboutPageContent: {
+    aboutContent: {
       $: {
-        where: { isActive: true }
+        where: { pageId: 'about' }
       }
     }
   });
 
   // Set initial values when data loads
   useEffect(() => {
-    if (aboutData?.aboutPageContent?.[0]) {
-      const content = aboutData.aboutPageContent[0];
-      setPhilosophyItems(content.philosophyContent || []);
+    if (aboutData?.aboutContent?.[0]) {
+      const content = aboutData.aboutContent[0];
+      setBio(content.bio || '');
+      setCurrentFocus(content.currentFocus || '');
 
-      // Ensure milestones have IDs
-      const milestonesWithIds = (content.milestones || []).map((m: {
-        id?: string;
-        title: string;
-        date: string;
-        description: string;
-      }, index: number) => ({
-        ...m,
-        id: m.id || `milestone-${Date.now()}-${index}`
+      // Ensure journey items have IDs
+      const journeyWithIds = (content.journey || []).map((item: any, index: number) => ({
+        ...item,
+        id: item.id || `journey-${Date.now()}-${index}`
       }));
-      setMilestones(milestonesWithIds);
+      setJourney(journeyWithIds);
 
-      // Ensure team members have IDs
-      const membersWithIds = (content.teamMembers || []).map((member: {
-        id?: string;
-        name: string;
-        role: string;
-        bio: string;
-        image?: string;
-      }, index: number) => ({
-        ...member,
-        id: member.id || `member-${Date.now()}-${index}`
-      }));
-      setTeamMembers(membersWithIds);
+      setSkills(content.skills || []);
+      setContact(content.contact || {
+        email: '',
+        github: '',
+        linkedin: '',
+        twitter: '',
+        website: ''
+      });
     }
   }, [aboutData]);
 
-  const addPhilosophyItem = () => {
-    if (newPhilosophyItem.trim()) {
-      setPhilosophyItems([...philosophyItems, newPhilosophyItem.trim()]);
-      setNewPhilosophyItem('');
-    }
-  };
-
-  const removePhilosophyItem = (index: number) => {
-    setPhilosophyItems(philosophyItems.filter((_, i) => i !== index));
-  };
-
-  const updatePhilosophyItem = (index: number, value: string) => {
-    const updated = [...philosophyItems];
-    updated[index] = value;
-    setPhilosophyItems(updated);
-  };
-
-  const addMilestone = () => {
-    const newMilestone = {
-      id: `milestone-${Date.now()}`,
+  // Journey management
+  const addJourneyItem = () => {
+    const newItem = {
+      id: `journey-${Date.now()}`,
       title: '',
       date: '',
       description: ''
     };
-    setMilestones([...milestones, newMilestone]);
+    setJourney([...journey, newItem]);
   };
 
-  const removeMilestone = (id: string) => {
-    setMilestones(milestones.filter(m => m.id !== id));
+  const removeJourneyItem = (id: string) => {
+    setJourney(journey.filter(item => item.id !== id));
   };
 
-  const updateMilestone = (id: string, field: string, value: string) => {
-    setMilestones(milestones.map(m =>
-      m.id === id ? { ...m, [field]: value } : m
+  const updateJourneyItem = (id: string, field: string, value: string) => {
+    setJourney(journey.map(item =>
+      item.id === id ? { ...item, [field]: value } : item
     ));
   };
 
-  const addTeamMember = () => {
-    const newMember = {
-      id: `member-${Date.now()}`,
-      name: '',
-      role: '',
-      bio: '',
-      image: ''
-    };
-    setTeamMembers([...teamMembers, newMember]);
+  // Skills management
+  const addSkill = () => {
+    if (newSkill.trim() && !skills.includes(newSkill.trim())) {
+      setSkills([...skills, newSkill.trim()]);
+      setNewSkill('');
+    }
   };
 
-  const removeTeamMember = (id: string) => {
-    setTeamMembers(teamMembers.filter(m => m.id !== id));
+  const removeSkill = (index: number) => {
+    setSkills(skills.filter((_, i) => i !== index));
   };
 
-  const updateTeamMember = (id: string, field: string, value: string) => {
-    setTeamMembers(teamMembers.map(m =>
-      m.id === id ? { ...m, [field]: value } : m
-    ));
-  };
-
+  // Save changes
   const saveChanges = async () => {
     try {
       setIsUpdating(true);
-      setStatus('Updating...');
+      setStatus('Updating about page...');
 
-      const aboutRecord = aboutData?.aboutPageContent?.[0];
+      const aboutRecord = aboutData?.aboutContent?.[0];
       if (aboutRecord) {
         await db.transact(
-          db.tx.aboutPageContent[aboutRecord.id].update({
-            philosophyContent: philosophyItems,
-            milestones: milestones,
-            teamMembers: teamMembers,
+          db.tx.aboutContent[aboutRecord.id].update({
+            bio,
+            currentFocus: currentFocus || null,
+            journey: journey.filter(item => item.title && item.date),
+            skills,
+            contact,
             updatedAt: Date.now()
           })
         );
       } else {
         // Create new record if none exists
-        const { id } = await import('@instantdb/react');
-        const newId = id();
         await db.transact(
-          db.tx.aboutPageContent[newId].update({
-            philosophyContent: philosophyItems,
-            milestones: milestones,
-            teamMembers: teamMembers,
+          db.tx.aboutContent[id()].update({
+            pageId: 'about',
+            bio,
+            currentFocus: currentFocus || null,
+            journey: journey.filter(item => item.title && item.date),
+            skills,
+            contact,
             isActive: true,
+            createdAt: Date.now(),
             updatedAt: Date.now()
           })
         );
       }
 
-      setStatus('Successfully updated About page content!');
-      setTimeout(() => setStatus(''), 3000);
+      setStatus('About page updated successfully!');
     } catch (error) {
-      console.error('Error updating content:', error);
-      setStatus(`Error: ${error}`);
+      console.error('Failed to update about page:', error);
+      setStatus('Error updating. Please try again.');
     } finally {
       setIsUpdating(false);
+      setTimeout(() => setStatus(''), 3000);
     }
   };
-
-  const tabs = [
-    { id: 'philosophy', label: 'Philosophy', color: 'text-purple-600' },
-    { id: 'milestones', label: 'Milestones', color: 'text-blue-600' },
-    { id: 'team', label: 'Team', color: 'text-green-600' }
-  ];
 
   return (
     <div>
       {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">About Page Management</h1>
-        <p className="mt-2 text-gray-600">Update the content displayed on the About page</p>
+      <div className="mb-10">
+        <h1 className="text-4xl font-bold tracking-tight text-gray-900">About Page</h1>
+        <p className="mt-2 text-gray-600 font-light">Manage your portfolio about section</p>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-        {/* Tabs */}
+      {/* Tab Navigation */}
+      <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg shadow-gray-200/50 border border-gray-100 mb-8">
         <div className="border-b border-gray-200">
-          <nav className="flex space-x-8 px-6" aria-label="Tabs">
-            {tabs.map((tab) => (
+          <nav className="flex -mb-px">
+            {[
+              { key: 'bio', label: 'Bio & Focus', icon: '👤' },
+              { key: 'journey', label: 'Journey', icon: '🚀' },
+              { key: 'skills', label: 'Skills', icon: '🛠️' },
+              { key: 'contact', label: 'Contact', icon: '📬' }
+            ].map((tab) => (
               <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as 'philosophy' | 'milestones' | 'team')}
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key as any)}
                 className={`
-                  py-4 px-1 border-b-2 font-medium text-sm transition-colors
-                  ${activeTab === tab.id
-                    ? `${tab.color} border-current`
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  flex-1 py-4 px-6 text-center font-medium text-sm transition-all duration-200
+                  ${activeTab === tab.key
+                    ? 'text-purple-600 border-b-2 border-purple-600 bg-purple-50/50'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                   }
                 `}
               >
+                <span className="mr-2">{tab.icon}</span>
                 {tab.label}
               </button>
             ))}
@@ -214,102 +191,81 @@ export default function AdminAboutPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.2 }}
           >
-            {/* Philosophy Tab */}
-            {activeTab === 'philosophy' && (
+            {/* Bio Tab */}
+            {activeTab === 'bio' && (
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Philosophy Content</h3>
-                  <p className="text-sm text-gray-500 mb-6">
-                    Add key philosophy points that describe your company&apos;s values and approach.
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Bio <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    rows={8}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="Tell your story... Who are you? What drives you?"
+                  />
+                  <p className="mt-2 text-xs text-gray-500">
+                    This is the main bio text that appears on your about page
                   </p>
+                </div>
 
-                  {philosophyItems.length === 0 ? (
-                    <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
-                      <p className="text-gray-500">No philosophy items yet. Add your first point below.</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4 mb-6">
-                      {philosophyItems.map((item, index) => (
-                        <div
-                          key={index}
-                          className="bg-white p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
-                        >
-                          <div className="flex items-start gap-3">
-                            <span className="flex-shrink-0 w-8 h-8 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center text-sm font-semibold">
-                              {index + 1}
-                            </span>
-                            <textarea
-                              value={item}
-                              onChange={(e) => updatePhilosophyItem(index, e.target.value)}
-                              placeholder="Enter philosophy point..."
-                              rows={2}
-                              className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none text-gray-700"
-                            />
-                            <div className="flex gap-2">
-                              <button
-                                onClick={() => removePhilosophyItem(index)}
-                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                title="Delete"
-                              >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="bg-gray-50 p-4 rounded-lg border border-dashed border-gray-300">
-                    <div className="flex gap-3">
-                      <input
-                        type="text"
-                        value={newPhilosophyItem}
-                        onChange={(e) => setNewPhilosophyItem(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && addPhilosophyItem()}
-                        placeholder="Type a new philosophy point..."
-                        className="flex-1 px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      />
-                      <button
-                        onClick={addPhilosophyItem}
-                        className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium flex items-center gap-2"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                        </svg>
-                        Add
-                      </button>
-                    </div>
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Current Focus
+                  </label>
+                  <textarea
+                    value={currentFocus}
+                    onChange={(e) => setCurrentFocus(e.target.value)}
+                    rows={3}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="What are you currently working on or excited about?"
+                  />
                 </div>
               </div>
             )}
 
-            {/* Milestones Tab */}
-            {activeTab === 'milestones' && (
+            {/* Journey Tab */}
+            {activeTab === 'journey' && (
               <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Company Milestones</h3>
-                  <p className="text-sm text-gray-600 mb-6">
-                    Add important milestones in your company&apos;s journey.
-                  </p>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Journey Milestones</h3>
+                  <button
+                    onClick={addJourneyItem}
+                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                  >
+                    Add Milestone
+                  </button>
+                </div>
 
-                  <div className="space-y-6">
-                    {milestones.map((milestone) => (
-                      <div key={milestone.id} className="p-6 bg-gray-50 rounded-xl">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                {journey.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    No milestones yet. Add your first journey milestone!
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {journey.map((item, index) => (
+                      <div key={item.id} className="bg-gray-50 rounded-lg p-6 relative">
+                        <button
+                          onClick={() => removeJourneyItem(item.id)}
+                          className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+
+                        <div className="grid grid-cols-2 gap-4 mb-4">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                               Title
                             </label>
                             <input
                               type="text"
-                              value={milestone.title}
-                              onChange={(e) => updateMilestone(milestone.id, 'title', e.target.value)}
-                              placeholder="e.g., Company Founded"
-                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              value={item.title}
+                              onChange={(e) => updateJourneyItem(item.id, 'title', e.target.value)}
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                              placeholder="Milestone title"
                             />
                           </div>
                           <div>
@@ -318,153 +274,180 @@ export default function AdminAboutPage() {
                             </label>
                             <input
                               type="text"
-                              value={milestone.date}
-                              onChange={(e) => updateMilestone(milestone.id, 'date', e.target.value)}
-                              placeholder="e.g., January 2024"
-                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              value={item.date}
+                              onChange={(e) => updateJourneyItem(item.id, 'date', e.target.value)}
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                              placeholder="e.g., 2024"
                             />
                           </div>
                         </div>
-                        <div className="mb-4">
+                        <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
                             Description
                           </label>
                           <textarea
-                            value={milestone.description}
-                            onChange={(e) => updateMilestone(milestone.id, 'description', e.target.value)}
-                            placeholder="Describe this milestone..."
+                            value={item.description}
+                            onChange={(e) => updateJourneyItem(item.id, 'description', e.target.value)}
                             rows={2}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            placeholder="What happened? Why was it important?"
                           />
                         </div>
-                        <button
-                          onClick={() => removeMilestone(milestone.id)}
-                          className="text-red-600 hover:text-red-700 text-sm font-medium"
-                        >
-                          Remove Milestone
-                        </button>
                       </div>
                     ))}
                   </div>
-
-                  <button
-                    onClick={addMilestone}
-                    className="mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                  >
-                    Add Milestone
-                  </button>
-                </div>
+                )}
               </div>
             )}
 
-            {/* Team Tab */}
-            {activeTab === 'team' && (
+            {/* Skills Tab */}
+            {activeTab === 'skills' && (
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Team Members</h3>
-                  <p className="text-sm text-gray-600 mb-6">
-                    Add and manage team member profiles.
-                  </p>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Add Skill or Tool
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newSkill}
+                      onChange={(e) => setNewSkill(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      placeholder="e.g., React, TypeScript, Claude Code..."
+                    />
+                    <button
+                      onClick={addSkill}
+                      className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                    >
+                      Add
+                    </button>
+                  </div>
+                </div>
 
-                  <div className="space-y-6">
-                    {teamMembers.map((member) => (
-                      <div key={member.id} className="p-6 bg-gray-50 rounded-xl">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Name
-                            </label>
-                            <input
-                              type="text"
-                              value={member.name}
-                              onChange={(e) => updateTeamMember(member.id, 'name', e.target.value)}
-                              placeholder="Full Name"
-                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Role
-                            </label>
-                            <input
-                              type="text"
-                              value={member.role}
-                              onChange={(e) => updateTeamMember(member.id, 'role', e.target.value)}
-                              placeholder="e.g., CEO, CTO, etc."
-                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                            />
-                          </div>
-                        </div>
-                        <div className="mb-4">
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Bio
-                          </label>
-                          <textarea
-                            value={member.bio}
-                            onChange={(e) => updateTeamMember(member.id, 'bio', e.target.value)}
-                            placeholder="Brief bio or description..."
-                            rows={3}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
-                          />
-                        </div>
-                        <div className="mb-4">
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Image URL (Optional)
-                          </label>
-                          <input
-                            type="text"
-                            value={member.image}
-                            onChange={(e) => updateTeamMember(member.id, 'image', e.target.value)}
-                            placeholder="https://example.com/image.jpg"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                          />
-                        </div>
+                {skills.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {skills.map((skill, index) => (
+                      <span
+                        key={index}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-full"
+                      >
+                        {skill}
                         <button
-                          onClick={() => removeTeamMember(member.id)}
-                          className="text-red-600 hover:text-red-700 text-sm font-medium"
+                          onClick={() => removeSkill(index)}
+                          className="text-gray-500 hover:text-red-500 transition-colors"
                         >
-                          Remove Team Member
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
                         </button>
-                      </div>
+                      </span>
                     ))}
                   </div>
+                )}
 
-                  <button
-                    onClick={addTeamMember}
-                    className="mt-6 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
-                  >
-                    Add Team Member
-                  </button>
+                {skills.length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    No skills added yet. Add your technical skills and tools!
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Contact Tab */}
+            {activeTab === 'contact' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={contact.email}
+                    onChange={(e) => setContact({ ...contact, email: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="your@email.com"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    GitHub
+                  </label>
+                  <input
+                    type="url"
+                    value={contact.github}
+                    onChange={(e) => setContact({ ...contact, github: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="https://github.com/username"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    LinkedIn
+                  </label>
+                  <input
+                    type="url"
+                    value={contact.linkedin}
+                    onChange={(e) => setContact({ ...contact, linkedin: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="https://linkedin.com/in/username"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Twitter
+                  </label>
+                  <input
+                    type="url"
+                    value={contact.twitter}
+                    onChange={(e) => setContact({ ...contact, twitter: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="https://twitter.com/username"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Personal Website
+                  </label>
+                  <input
+                    type="url"
+                    value={contact.website}
+                    onChange={(e) => setContact({ ...contact, website: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="https://yourwebsite.com"
+                  />
                 </div>
               </div>
             )}
           </motion.div>
-
-          {/* Save Button */}
-          <div className="mt-8 pt-8 border-t border-gray-200">
-            <button
-              onClick={saveChanges}
-              disabled={isUpdating}
-              className="w-full px-6 py-4 bg-purple-600 text-white text-base font-semibold rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-4 focus:ring-purple-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-            >
-              {isUpdating ? 'Updating...' : 'Save All Changes'}
-            </button>
-
-            {status && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={`mt-4 p-4 rounded-lg text-center ${
-                  status.includes('Success') ? 'bg-green-50 text-green-800 border border-green-200' :
-                  status.includes('Error') ? 'bg-red-50 text-red-800 border border-red-200' :
-                  'bg-blue-50 text-blue-800 border border-blue-200'
-                }`}
-              >
-                {status}
-              </motion.div>
-            )}
-          </div>
         </div>
+      </div>
+
+      {/* Save Button */}
+      <div className="flex justify-end gap-4">
+        {status && (
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className={`flex items-center px-4 py-2 rounded-lg text-sm ${
+              status.includes('Error') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+            }`}
+          >
+            {status}
+          </motion.div>
+        )}
+
+        <button
+          onClick={saveChanges}
+          disabled={isUpdating}
+          className="px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl hover:ring-2 hover:ring-purple-500/20 hover:ring-offset-2 transform active:scale-[0.98]"
+        >
+          {isUpdating ? 'Saving...' : 'Save Changes'}
+        </button>
       </div>
     </div>
   );

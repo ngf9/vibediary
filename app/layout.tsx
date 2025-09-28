@@ -24,13 +24,13 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: "Vibe Coding 101 - Learn the Craft of Building with AI",
-  description: "Transform your career with Vibe Coding. A 6-week course for non-technical professionals to learn how to ship products end-to-end using AI and vibe coding tools.",
-  keywords: ["vibe coding", "AI education", "learn coding", "AI tools", "Claude Code", "product development"],
-  authors: [{ name: "AI Study Camp" }],
+  title: "Diary of a Vibe Coder",
+  description: "A collection of projects and essays on building with AI and vibe coding.",
+  keywords: ["vibe coding", "AI projects", "building with AI", "AI tools", "Claude Code", "product development"],
+  authors: [{ name: "Diary of a Vibe Coder" }],
   openGraph: {
-    title: "Vibe Coding 101 - Learn the Craft of Building with AI",
-    description: "Transform your career with Vibe Coding. Build real products with AI tools.",
+    title: "Diary of a Vibe Coder",
+    description: "A collection of projects and essays on building with AI.",
     type: "website",
   },
 };

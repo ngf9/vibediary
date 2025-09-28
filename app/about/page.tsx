@@ -1,17 +1,14 @@
-import { getAboutPageContent, getAllCohortDates } from '@/lib/instant-server';
+import { getAboutPageContent } from '@/lib/instant-server';
 import AboutPageClient from './client';
 
 export default async function AboutPage() {
   // Fetch data server-side for SEO
-  const [aboutContent, cohortDates] = await Promise.all([
-    getAboutPageContent(),
-    getAllCohortDates()
-  ]);
+  const aboutContent = await getAboutPageContent();
 
   // Parse the JSON data or use defaults
   const philosophyContent = aboutContent?.philosophyContent || [
-    "We believe that AI education should be accessible, practical, and transformative. Our approach breaks down complex concepts into intuitive understanding, then builds them back up through hands-on experience.",
-    "At AI Study Camp, we're not just teaching tools—we're cultivating a mindset. We want you to think like a builder, understand like an engineer, and create with the confidence of someone who truly grasps the technology they're wielding."
+    "I believe that AI education should be accessible, practical, and transformative. My approach breaks down complex concepts into intuitive understanding, then builds them back up through hands-on experience.",
+    "I'm not just teaching tools—I'm cultivating a mindset. I want you to think like a builder, understand like an engineer, and create with the confidence of someone who truly grasps the technology you're wielding."
   ];
 
   const milestones = aboutContent?.milestones || [
@@ -47,14 +44,10 @@ export default async function AboutPage() {
     }
   ];
 
-  const teamMembers = aboutContent?.teamMembers || [];
-
   return (
     <AboutPageClient
       philosophyContent={philosophyContent}
       milestones={milestones}
-      teamMembers={teamMembers}
-      cohortDates={cohortDates}
     />
   );
 }

@@ -3,7 +3,6 @@
 import React from 'react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
-import TeamMemberCard from '@/components/TeamMemberCard';
 import Image from 'next/image';
 import { motion, useInView } from 'motion/react';
 import { useRef } from 'react';
@@ -16,33 +15,12 @@ interface AboutPageClientProps {
     date: string;
     description: string;
   }>;
-  teamMembers?: Array<{
-    name: string;
-    role: string;
-    funFacts: string[];
-    favoriteResource: string;
-    officeHours: string;
-    bio: string;
-    mentorshipPhilosophy: string;
-    image: string;
-  }>;
-  cohortDates?: Array<{
-    id: string;
-    courseId: string;
-    startDate: string;
-    title?: string;
-    subtitle?: string;
-    description?: string;
-    isActive: boolean;
-    updatedAt?: number;
-    createdAt?: number;
-  }>;
 }
 
 export default function AboutPageClient({
   philosophyContent = [
-    "We believe that AI education should be accessible, practical, and transformative. Our approach breaks down complex concepts into intuitive understanding, then builds them back up through hands-on experience.",
-    "At AI Study Camp, we're not just teaching tools—we're cultivating a mindset. We want you to think like a builder, understand like an engineer, and create with the confidence of someone who truly grasps the technology they're wielding."
+    "I believe that AI education should be accessible, practical, and transformative. My approach breaks down complex concepts into intuitive understanding, then builds them back up through hands-on experience.",
+    "I'm not just teaching tools—I'm cultivating a mindset. I want you to think like a builder, understand like an engineer, and create with the confidence of someone who truly grasps the technology you're wielding."
   ],
   milestones = [
     {
@@ -75,19 +53,15 @@ export default function AboutPageClient({
       date: "2025",
       description: "Expanding with new courses, tools, and a thriving builder community"
     }
-  ],
-  teamMembers = [],
-  cohortDates = []
+  ]
 }: AboutPageClientProps) {
   // Refs for scroll animations
   const philosophyRef = useRef(null);
   const timelineRef = useRef(null);
-  const teamRef = useRef(null);
 
   // Track if sections are in view
   const philosophyInView = useInView(philosophyRef, { once: true, margin: "-100px" });
   const timelineInView = useInView(timelineRef, { once: true, margin: "-100px" });
-  const teamInView = useInView(teamRef, { once: true, margin: "-100px" });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white relative">
@@ -100,7 +74,7 @@ export default function AboutPageClient({
         <div className="aurora-strip aurora-5" />
       </div>
 
-      <Navigation cohortDates={cohortDates} />
+      <Navigation />
 
       <div className="relative z-10 pt-32">
         {/* Header */}
@@ -111,7 +85,7 @@ export default function AboutPageClient({
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
           <h1 className="text-6xl lg:text-7xl font-bold text-gray-900">
-            About <span className="text-blue">AI Study Camp</span>
+            About <span className="text-blue">Me</span>
           </h1>
         </motion.div>
 
@@ -137,7 +111,7 @@ export default function AboutPageClient({
                 ))}
                 <div className="bg-blue/10 border-l-4 border-blue p-6 rounded-r-lg mb-16">
                   <p className="font-medium text-gray-800">
-                    &quot;The best way to predict the future is to build it. We&apos;re here to give you the tools, knowledge, and confidence to do exactly that.&quot;
+                    &quot;The best way to predict the future is to build it. I&apos;m here to share the tools, knowledge, and confidence to do exactly that.&quot;
                   </p>
                 </div>
               </div>
@@ -160,7 +134,7 @@ export default function AboutPageClient({
               animate={timelineInView ? { opacity: 1, y: 0 } : { opacity: 0, y: -20 }}
               transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
             >
-              Making AI Study Camp
+              My Journey
             </motion.h2>
 
             {/* Desktop Layout with 3 columns */}
@@ -322,44 +296,6 @@ export default function AboutPageClient({
             </div>
           </motion.div>
         </div>
-
-        {/* Meet The Team Section */}
-        {teamMembers.length > 0 && (
-          <div className="bg-white mt-32" style={{ paddingTop: '4rem', paddingBottom: '8rem' }}>
-            <motion.div
-              ref={teamRef}
-              className="max-w-7xl mx-auto px-8"
-              initial={{ opacity: 0 }}
-              animate={teamInView ? { opacity: 1 } : { opacity: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-            >
-              <motion.h2
-                className="text-4xl font-bold text-center mb-12 text-gray-900"
-                initial={{ opacity: 0, y: -20 }}
-                animate={teamInView ? { opacity: 1, y: 0 } : { opacity: 0, y: -20 }}
-                transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
-              >
-                Meet The Team
-              </motion.h2>
-
-            <div className="space-y-4">
-              {teamMembers.map((member, index) => (
-                <TeamMemberCard
-                  key={index}
-                  name={member.name}
-                  role={member.role}
-                  funFacts={member.funFacts}
-                  favoriteResource={member.favoriteResource}
-                  officeHours={member.officeHours}
-                  bio={member.bio}
-                  mentorshipPhilosophy={member.mentorshipPhilosophy}
-                  image={member.image}
-                />
-              ))}
-            </div>
-            </motion.div>
-          </div>
-        )}
       </div>
 
       <Footer />

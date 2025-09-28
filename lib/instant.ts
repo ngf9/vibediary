@@ -1,8 +1,8 @@
 import { init } from '@instantdb/react';
-import schema from '@/instant.schema';
+import schema from '@/instant.schema.portfolio';
 
 // Initialize Instant DB with your app ID
-const APP_ID = process.env.NEXT_PUBLIC_INSTANT_APP_ID || '6bacc7ad-5ab9-4b1d-9ae1-005ce9234bb0';
+const APP_ID = process.env.NEXT_PUBLIC_INSTANT_APP_ID || 'beef7fbd-79bf-46cc-9a21-fead1908943b';
 
 // Debug logging in production
 if (typeof window !== 'undefined') {
