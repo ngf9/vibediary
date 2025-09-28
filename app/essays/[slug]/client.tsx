@@ -84,12 +84,16 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
   // Extract sections for navigation
   const sections = useMemo(() => {
     return letterContent.sections
-      ?.filter(section => 'id' in section && 'navLabel' in section)
-      .map(section => {
-        const sectionWithNav = section as { id: string; navLabel: string };
+      ?.filter(section => 'id' in section)
+      .map((section, index) => {
+        const sectionWithId = section as { id: string; navLabel?: string; title?: string };
+        // Use navLabel if available, otherwise use title, or create a default label
+        const label = sectionWithId.navLabel ||
+                     sectionWithId.title ||
+                     `Section ${index + 1}`;
         return {
-          id: sectionWithNav.id,
-          navLabel: sectionWithNav.navLabel
+          id: sectionWithId.id,
+          navLabel: label
         };
       }) || [];
   }, [letterContent.sections]);
@@ -99,10 +103,14 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
     const handleScroll = () => {
       const scrollPosition = window.scrollY + window.innerHeight / 3;
 
-      // Get all section elements
-      const sectionElements = letterContent.sections?.map(section =>
-        document.getElementById(section.id)
-      ).filter(Boolean) || [];
+      // Get all section elements - look for the correct ID format
+      const sectionElements = letterContent.sections?.map(section => {
+        // Try multiple ID formats to find the element
+        const elementById = document.getElementById(`section-${section.id}`) ||
+                           document.getElementById(section.id) ||
+                           document.getElementById(`section-${sections.findIndex(s => s.id === section.id)}`);
+        return elementById;
+      }).filter(Boolean) || [];
 
       // Find the current section
       let current = 'opening';
@@ -121,10 +129,12 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
     handleScroll(); // Initial check
 
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [letterContent.sections]);
+  }, [letterContent.sections, sections]);
 
   const scrollToSection = useCallback((sectionId: string) => {
-    const element = document.getElementById(sectionId);
+    // Try multiple ID formats to find the element
+    const element = document.getElementById(`section-${sectionId}`) ||
+                   document.getElementById(sectionId);
     if (element) {
       const offset = 100;
       const elementPosition = element.getBoundingClientRect().top + window.scrollY;

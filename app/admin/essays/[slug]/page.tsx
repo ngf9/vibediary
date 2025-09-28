@@ -487,17 +487,21 @@ export default function EditEssayPage() {
                 <button
                   type="submit"
                   disabled={isUpdating}
-                  className="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl hover:ring-2 hover:ring-purple-500/20 hover:ring-offset-2 transform active:scale-[0.98]"
+                  className="w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform active:scale-[0.98]"
+                  style={{ color: '#ffffff' }}
                 >
-                  {isUpdating ? 'Saving...' : isNew ? 'Create Essay' : 'Save Changes'}
+                  <span style={{ color: '#ffffff', opacity: 1 }}>
+                    {isUpdating ? 'Saving...' : isNew ? 'Create Essay' : 'Save Changes'}
+                  </span>
                 </button>
 
                 <Link href="/admin/essays">
                   <button
                     type="button"
-                    className="w-full py-3 px-4 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                    className="w-full py-3 px-4 bg-gray-100 font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                    style={{ color: '#374151' }}
                   >
-                    Cancel
+                    <span style={{ color: '#374151', opacity: 1 }}>Cancel</span>
                   </button>
                 </Link>
               </div>
