@@ -30,7 +30,9 @@ const _schema = i.schema({
       subtitle: i.string().optional(),
       excerpt: i.string(), // Short description for cards
       content: i.any(), // JSON or markdown content
-      coverImage: i.string().optional(),
+      thumbnail: i.string().optional(), // Card thumbnail image for homepage
+      heroImage: i.string().optional(), // Hero image for essay page
+      coverImage: i.string().optional(), // Legacy field, keeping for compatibility
       tags: i.any().optional(), // JSON array of tags
       featured: i.boolean().indexed(),
       published: i.boolean().indexed(),

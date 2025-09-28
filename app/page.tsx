@@ -1,13 +1,13 @@
-import VanGoghLayout from '@/components/VanGoghLayout';
-import { getFeaturedProjects } from '@/lib/instant-server-portfolio';
+import SimpleLayout from '@/components/SimpleLayout';
+import { getEssays } from '@/lib/instant-server-portfolio';
 
 export default async function Home() {
-  // Fetch featured projects server-side
-  const projects = await getFeaturedProjects();
+  // Fetch all essays for both the list and navigation
+  const allEssays = await getEssays();
 
   return (
     <main>
-      <VanGoghLayout projects={projects} />
+      <SimpleLayout essays={allEssays} allEssays={allEssays} />
     </main>
   );
 }

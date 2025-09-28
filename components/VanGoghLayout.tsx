@@ -17,34 +17,38 @@ interface Section {
   number: string;
 }
 
-interface Project {
+interface Essay {
   id: string;
   slug: string;
   title: string;
   subtitle?: string;
-  description: string;
+  excerpt?: string;
+  description?: string;
   thumbnail?: string;
+  heroImage?: string;
   color?: string;
-  status: string;
+  published: boolean;
   featured: boolean;
-  sortOrder: number;
+  publishedAt?: string;
+  tags?: string[];
 }
 
 interface VanGoghLayoutProps {
-  projects: Project[];
+  essays: Essay[];
+  allEssays: Essay[];
 }
 
-export default function VanGoghLayout({ projects }: VanGoghLayoutProps) {
-  // Transform projects into card sections
-  const sections: Section[] = projects.map((project, index) => ({
-    id: project.slug,
-    title: project.title,
-    subtitle: project.subtitle || '',
-    color: project.color || (index % 2 === 0 ? '#5433FF' : '#FFB343'),
-    href: `/projects/${project.slug}`,
-    hoverImage: project.thumbnail || '/vibefront2.png',
+export default function VanGoghLayout({ essays, allEssays }: VanGoghLayoutProps) {
+  // Transform essays into card sections
+  const sections: Section[] = essays.map((essay, index) => ({
+    id: essay.slug,
+    title: essay.title,
+    subtitle: essay.subtitle || '',
+    color: essay.color || '#9CA3AF',
+    href: `/essays/${essay.slug}`,
+    hoverImage: essay.thumbnail || '/vibefront2.png',
     cohortDate: '',
-    description: project.description,
+    description: essay.excerpt || essay.description || '',
     number: String(index + 1).padStart(2, '0')
   }));
   
@@ -59,7 +63,7 @@ export default function VanGoghLayout({ projects }: VanGoghLayoutProps) {
         <div className="aurora-strip aurora-5" />
       </div>
       
-      <Navigation />
+      <Navigation essays={allEssays} />
       
       {/* Main Content */}
       <div className="flex flex-col pt-32 relative z-10 pb-8">

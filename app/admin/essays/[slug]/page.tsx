@@ -22,6 +22,8 @@ export default function EditEssayPage() {
   const [essaySlug, setEssaySlug] = useState('');
   const [excerpt, setExcerpt] = useState('');
   const [content, setContent] = useState('');
+  const [thumbnail, setThumbnail] = useState('');
+  const [heroImage, setHeroImage] = useState('');
   const [coverImage, setCoverImage] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [featured, setFeatured] = useState(false);
@@ -49,6 +51,8 @@ export default function EditEssayPage() {
       setEssaySlug(essay.slug || '');
       setExcerpt(essay.excerpt || '');
       setContent(essay.content || '');
+      setThumbnail(essay.thumbnail || '');
+      setHeroImage(essay.heroImage || '');
       setCoverImage(essay.coverImage || '');
       setTags(essay.tags || []);
       setFeatured(essay.featured || false);
@@ -92,6 +96,8 @@ export default function EditEssayPage() {
             subtitle: subtitle || null,
             excerpt,
             content,
+            thumbnail: thumbnail || null,
+            heroImage: heroImage || null,
             coverImage: coverImage || null,
             tags,
             featured,
@@ -116,6 +122,8 @@ export default function EditEssayPage() {
               subtitle: subtitle || null,
               excerpt,
               content,
+              thumbnail: thumbnail || null,
+              heroImage: heroImage || null,
               coverImage: coverImage || null,
               tags,
               featured,
@@ -270,15 +278,34 @@ export default function EditEssayPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Cover Image URL
+                    Thumbnail Image (Card Display)
                   </label>
                   <input
-                    type="url"
-                    value={coverImage}
-                    onChange={(e) => setCoverImage(e.target.value)}
+                    type="text"
+                    value={thumbnail}
+                    onChange={(e) => setThumbnail(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="https://example.com/cover.jpg"
+                    placeholder="/Inspirations1.png or https://example.com/thumbnail.jpg"
                   />
+                  <p className="mt-1 text-xs text-gray-500">
+                    Image shown on homepage cards. Use relative path for public folder images.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Hero Image (Essay Page)
+                  </label>
+                  <input
+                    type="text"
+                    value={heroImage}
+                    onChange={(e) => setHeroImage(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="/inspirations2.png or https://example.com/hero.jpg"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">
+                    Large image displayed on the essay page. Use relative path for public folder images.
+                  </p>
                 </div>
               </div>
             </div>

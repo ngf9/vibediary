@@ -109,7 +109,7 @@ export default function ModernTabNavigation({
               {tab.subItems && (
                 <svg
                   className={`w-4 h-4 transition-transform ${
-                    isDropdownOpen && tab.id === 'courses' ? 'rotate-180' : ''
+                    isDropdownOpen && tab.id === 'essays' ? 'rotate-180' : ''
                   }`}
                   fill="none"
                   stroke="currentColor"
@@ -136,7 +136,7 @@ export default function ModernTabNavigation({
             </button>
 
             {/* Dropdown Menu */}
-            {tab.subItems && isDropdownOpen && tab.id === 'courses' && (
+            {tab.subItems && isDropdownOpen && tab.id === 'essays' && (
               <div ref={dropdownRef}>
                 <motion.div
                   initial={{ opacity: 0, y: -5 }}

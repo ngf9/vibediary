@@ -5,18 +5,36 @@ import { useRouter } from 'next/navigation';
 import ModernTabNavigation from './ModernTabNavigation';
 import { motion, AnimatePresence } from 'motion/react';
 
-export default function Navigation() {
+interface Essay {
+  id: string;
+  slug: string;
+  title: string;
+}
+
+interface NavigationProps {
+  essays?: Essay[];
+}
+
+export default function Navigation({ essays = [] }: NavigationProps) {
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isMobileProjectsOpen, setIsMobileProjectsOpen] = useState(false);
+  const [isMobileEssaysOpen, setIsMobileEssaysOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
 
   const navigationTabs = [
     { id: 'home', label: 'Home', href: '/' },
-    { id: 'projects', label: 'Projects', href: '/projects' },
-    { id: 'essays', label: 'Essays', href: '/essays' },
+    {
+      id: 'essays',
+      label: 'Essays',
+      href: '#',
+      subItems: essays.map(essay => ({
+        id: essay.slug,
+        label: essay.title,
+        href: `/essays/${essay.slug}`
+      }))
+    },
     { id: 'about', label: 'About', href: '/about' },
   ];
 
@@ -94,12 +112,12 @@ export default function Navigation() {
                     {tab.subItems ? (
                       <>
                         <button
-                          onClick={() => setIsMobileProjectsOpen(!isMobileProjectsOpen)}
+                          onClick={() => setIsMobileEssaysOpen(!isMobileEssaysOpen)}
                           className="w-full text-left px-4 py-3 hover:bg-gray-50 rounded-lg transition-colors text-gray-800 flex items-center justify-between"
                         >
                           <span>{tab.label}</span>
                           <svg
-                            className={`w-4 h-4 transition-transform ${isMobileProjectsOpen ? 'rotate-180' : ''}`}
+                            className={`w-4 h-4 transition-transform ${isMobileEssaysOpen ? 'rotate-180' : ''}`}
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -108,7 +126,7 @@ export default function Navigation() {
                           </svg>
                         </button>
                         <AnimatePresence>
-                          {isMobileProjectsOpen && (
+                          {isMobileEssaysOpen && (
                             <motion.ul
                               initial={{ height: 0, opacity: 0 }}
                               animate={{ height: 'auto', opacity: 1 }}

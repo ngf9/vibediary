@@ -62,38 +62,29 @@ export default function GridCards({ cards }: GridCardsProps) {
             )}
 
             {/* Gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60" />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/20" />
           </div>
 
           {/* Content */}
-          <div className="relative h-full flex flex-col justify-between p-6 lg:p-8 text-white z-10">
-            {/* Number */}
-            <motion.div
-              className="text-5xl lg:text-6xl font-light opacity-50"
-              animate={{ opacity: hoveredCard === card.id ? 0.8 : 0.5 }}
-              transition={{ duration: 0.3 }}
-            >
-              {card.number}
-            </motion.div>
-
+          <div className="relative h-full flex flex-col justify-end p-6 lg:p-8 text-gray-900 z-10">
             {/* Bottom content */}
             <div>
-              <motion.p 
-                className="text-xs lg:text-sm uppercase tracking-wider mb-2 opacity-80"
-                animate={{ opacity: hoveredCard === card.id ? 1 : 0.8 }}
+              <motion.p
+                className="text-xs lg:text-sm uppercase tracking-wider mb-2 opacity-70"
+                animate={{ opacity: hoveredCard === card.id ? 0.9 : 0.7 }}
               >
                 {card.subtitle}
               </motion.p>
-              <motion.h3 
+              <motion.h3
                 className="text-2xl lg:text-3xl font-bold mb-2 leading-tight"
-                animate={{ opacity: hoveredCard === card.id ? 1 : 0.95 }}
+                animate={{ opacity: hoveredCard === card.id ? 1 : 0.9 }}
               >
                 {card.title}
               </motion.h3>
-              <motion.p 
-                className="text-sm lg:text-base opacity-90 leading-relaxed"
+              <motion.p
+                className="text-sm lg:text-base opacity-80 leading-relaxed"
                 initial={{ opacity: 0, height: 0 }}
-                animate={{ 
+                animate={{
                   opacity: hoveredCard === card.id ? 0.9 : 0,
                   height: hoveredCard === card.id ? 'auto' : 0
                 }}
@@ -102,9 +93,9 @@ export default function GridCards({ cards }: GridCardsProps) {
                 {card.description}
               </motion.p>
               {card.cohortDate && (
-                <motion.p 
-                  className="text-xs lg:text-sm mt-2 opacity-80"
-                  animate={{ opacity: hoveredCard === card.id ? 1 : 0.8 }}
+                <motion.p
+                  className="text-xs lg:text-sm mt-2 opacity-70"
+                  animate={{ opacity: hoveredCard === card.id ? 0.9 : 0.7 }}
                 >
                   {card.cohortDate}
                 </motion.p>
@@ -114,7 +105,7 @@ export default function GridCards({ cards }: GridCardsProps) {
 
           {/* Hover effect border */}
           <motion.div
-            className="absolute inset-0 border-2 border-white/20 rounded-3xl"
+            className="absolute inset-0 border-2 border-gray-600/30 rounded-3xl"
             initial={{ opacity: 0 }}
             animate={{ opacity: hoveredCard === card.id ? 1 : 0 }}
             transition={{ duration: 0.3 }}

@@ -9,8 +9,7 @@ export async function getProjects() {
           status: { $in: ['completed', 'in-progress'] }
         },
         order: {
-          sortOrder: 'asc',
-          createdAt: 'desc'
+          sortOrder: 'asc'
         }
       }
     }
@@ -78,8 +77,7 @@ export async function getEssays() {
           published: true
         },
         order: {
-          publishedAt: 'desc',
-          createdAt: 'desc'
+          publishedAt: 'desc'
         }
       }
     }
