@@ -16,6 +16,8 @@ interface Essay {
   subtitle?: string;
   excerpt?: string;
   content?: string;
+  sections?: any[]; // Structured content sections
+  editorMode?: 'simple' | 'advanced';
   heroTitle?: string;
   heroSubtitle?: string;
   heroImage?: string;
@@ -49,18 +51,23 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
   const heroTitle = essay.heroTitle || essay.title;
   const heroSubtitle = essay.heroSubtitle || essay.subtitle || '';
 
-  // If essay has structured letterContent, use it. Otherwise, create a simple structure from content
-  const letterContent = essay.letterContent || {
-    title: essay.title,
-    subtitle: essay.subtitle,
-    sections: essay.content ? [{
-      id: 'main-content',
-      title: '',
-      content: essay.content,
-      type: 'text',
-      navLabel: 'Essay'
-    }] : []
-  };
+  // If essay has structured sections or letterContent, use it. Otherwise, create a simple structure from content
+  const letterContent = essay.letterContent ||
+    (essay.sections && essay.sections.length > 0 ? {
+      title: essay.title,
+      subtitle: essay.subtitle,
+      sections: essay.sections
+    } : {
+      title: essay.title,
+      subtitle: essay.subtitle,
+      sections: essay.content ? [{
+        id: 'main-content',
+        title: '',
+        content: essay.content,
+        type: 'text',
+        navLabel: 'Essay'
+      }] : []
+    });
 
   // Scroll progress tracking
   const { scrollYProgress } = useScroll();
@@ -322,7 +329,7 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
             <div className={sections.length > 1 ? '' : 'lg:col-span-2'}>
               <DynamicLetterContent
                 letterContent={letterContent}
-                pastSyllabus={false}
+                letterInView={letterInView}
               />
             </div>
           </div>

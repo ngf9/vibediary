@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChevronUp, ChevronDown, Trash2, Plus, GripVertical } from 'lucide-react';
+import { ChevronUp, ChevronDown, Trash2, Plus, GripVertical, Image as ImageIcon } from 'lucide-react';
+import ImageUploader from './ImageUploader';
 
 interface ContentItem {
   type: string;
@@ -12,6 +13,11 @@ interface ContentItem {
   items?: string[];
   name?: string;
   title?: string;
+  src?: string;
+  alt?: string;
+  caption?: string;
+  alignment?: 'left' | 'center' | 'right' | 'full';
+  images?: Array<{ src: string; alt?: string; caption?: string }>;
 }
 
 interface Section {
@@ -172,6 +178,120 @@ export default function SectionEditor({ sections, onSectionsChange }: SectionEdi
           </div>
         );
 
+      case 'image':
+        return (
+          <div className="mb-4 p-3 bg-gray-50 rounded">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm font-medium">Image</span>
+              <button onClick={deleteContent} className="text-red-500 hover:text-red-700">
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <ImageUploader
+                value={content.src || ''}
+                onChange={(url) => updateContent({ src: url })}
+                placeholder="Enter image URL or upload"
+              />
+
+              <input
+                type="text"
+                value={content.alt || ''}
+                onChange={(e) => updateContent({ alt: e.target.value })}
+                placeholder="Alt text (for accessibility)"
+                className="w-full px-3 py-2 text-sm border rounded"
+              />
+
+              <input
+                type="text"
+                value={content.caption || ''}
+                onChange={(e) => updateContent({ caption: e.target.value })}
+                placeholder="Caption (optional)"
+                className="w-full px-3 py-2 text-sm border rounded"
+              />
+
+              <select
+                value={content.alignment || 'center'}
+                onChange={(e) => updateContent({ alignment: e.target.value as any })}
+                className="w-full px-3 py-2 text-sm border rounded"
+              >
+                <option value="left">Align Left</option>
+                <option value="center">Center</option>
+                <option value="right">Align Right</option>
+                <option value="full">Full Width</option>
+              </select>
+            </div>
+          </div>
+        );
+
+      case 'gallery':
+        return (
+          <div className="mb-4 p-3 bg-gray-50 rounded">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm font-medium">Image Gallery</span>
+              <button onClick={deleteContent} className="text-red-500 hover:text-red-700">
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {content.images?.map((image, i) => (
+                <div key={i} className="border rounded p-2 space-y-2">
+                  <ImageUploader
+                    value={image.src || ''}
+                    onChange={(url) => {
+                      const newImages = [...(content.images || [])];
+                      newImages[i] = { ...newImages[i], src: url };
+                      updateContent({ images: newImages });
+                    }}
+                    placeholder="Image URL"
+                  />
+                  <input
+                    type="text"
+                    value={image.alt || ''}
+                    onChange={(e) => {
+                      const newImages = [...(content.images || [])];
+                      newImages[i] = { ...newImages[i], alt: e.target.value };
+                      updateContent({ images: newImages });
+                    }}
+                    placeholder="Alt text"
+                    className="w-full px-3 py-1 text-sm border rounded"
+                  />
+                  <input
+                    type="text"
+                    value={image.caption || ''}
+                    onChange={(e) => {
+                      const newImages = [...(content.images || [])];
+                      newImages[i] = { ...newImages[i], caption: e.target.value };
+                      updateContent({ images: newImages });
+                    }}
+                    placeholder="Caption"
+                    className="w-full px-3 py-1 text-sm border rounded"
+                  />
+                  <button
+                    onClick={() => {
+                      const newImages = content.images?.filter((_, idx) => idx !== i) || [];
+                      updateContent({ images: newImages });
+                    }}
+                    className="text-sm text-red-600 hover:text-red-800"
+                  >
+                    Remove image
+                  </button>
+                </div>
+              ))}
+              <button
+                onClick={() => updateContent({
+                  images: [...(content.images || []), { src: '', alt: '', caption: '' }]
+                })}
+                className="text-sm text-blue-600 hover:text-blue-800"
+              >
+                + Add image to gallery
+              </button>
+            </div>
+          </div>
+        );
+
       default:
         return (
           <div className="mb-4 p-3 bg-gray-50 rounded">
@@ -271,7 +391,7 @@ export default function SectionEditor({ sections, onSectionsChange }: SectionEdi
                   </div>
                 ))}
 
-                <div className="flex gap-2 mt-3">
+                <div className="flex flex-wrap gap-2 mt-3">
                   <button
                     onClick={() => {
                       const newContent = [...section.content, { type: 'paragraph', content: '' }];
@@ -298,6 +418,24 @@ export default function SectionEditor({ sections, onSectionsChange }: SectionEdi
                     className="text-sm text-blue-600 hover:text-blue-800"
                   >
                     + Add List
+                  </button>
+                  <button
+                    onClick={() => {
+                      const newContent = [...section.content, { type: 'image', src: '', alt: '', caption: '', alignment: 'center' }];
+                      updateSectionContent(index, newContent);
+                    }}
+                    className="text-sm text-blue-600 hover:text-blue-800"
+                  >
+                    + Add Image
+                  </button>
+                  <button
+                    onClick={() => {
+                      const newContent = [...section.content, { type: 'gallery', images: [] }];
+                      updateSectionContent(index, newContent);
+                    }}
+                    className="text-sm text-blue-600 hover:text-blue-800"
+                  >
+                    + Add Gallery
                   </button>
                 </div>
               </div>

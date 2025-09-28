@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import Image from 'next/image';
 
 interface ContentItem {
   type: string;
@@ -15,6 +16,11 @@ interface ContentSection {
   items?: string[];
   name?: string;
   title?: string;
+  src?: string;
+  alt?: string;
+  caption?: string;
+  alignment?: 'left' | 'center' | 'right' | 'full';
+  images?: Array<{ src: string; alt?: string; caption?: string }>;
 }
 
 interface Section {
@@ -27,8 +33,9 @@ interface Section {
 
 interface SimplifiedSection {
   id: string;
-  title: string;
-  content: string;
+  title?: string;
+  navLabel?: string;
+  content: string | ContentSection[] | any;
   type?: string;
   dividerStyle?: string;
 }
@@ -174,7 +181,100 @@ export default function DynamicLetterContent({ letterContent, letterInView }: Dy
             </p>
           </div>
         );
-      
+
+      case 'image':
+        const alignmentClasses = {
+          left: 'mr-auto',
+          center: 'mx-auto',
+          right: 'ml-auto',
+          full: 'w-full'
+        };
+
+        const containerClasses = {
+          left: 'float-left mr-6 mb-4 max-w-md',
+          center: 'my-8',
+          right: 'float-right ml-6 mb-4 max-w-md',
+          full: 'my-8'
+        };
+
+        const imageWidth = section.alignment === 'full' ? 'w-full' :
+                          section.alignment === 'center' ? 'max-w-3xl' : 'max-w-md';
+
+        return (
+          <div key={index} className={containerClasses[section.alignment || 'center']}>
+            <motion.div
+              className={`${alignmentClasses[section.alignment || 'center']} ${imageWidth}`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={letterInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              {section.src && (
+                <div className="relative">
+                  <Image
+                    src={section.src}
+                    alt={section.alt || ''}
+                    width={800}
+                    height={600}
+                    className="w-full h-auto rounded-lg shadow-lg"
+                    style={{ objectFit: 'cover' }}
+                    unoptimized={section.src.startsWith('data:')}
+                  />
+                  {section.caption && (
+                    <p className="text-sm text-gray-600 italic text-center mt-3">
+                      {section.caption}
+                    </p>
+                  )}
+                </div>
+              )}
+            </motion.div>
+          </div>
+        );
+
+      case 'gallery':
+        return (
+          <motion.div
+            key={index}
+            className="my-12"
+            initial={{ opacity: 0 }}
+            animate={letterInView ? { opacity: 1 } : { opacity: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {section.images?.map((image, i) => (
+                <motion.div
+                  key={i}
+                  className="relative group"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={letterInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.4, delay: 0.3 + i * 0.1 }}
+                  whileHover={{ scale: 1.02 }}
+                >
+                  {image.src && (
+                    <div className="relative overflow-hidden rounded-lg shadow-md">
+                      <Image
+                        src={image.src}
+                        alt={image.alt || ''}
+                        width={400}
+                        height={300}
+                        className="w-full h-auto"
+                        style={{ objectFit: 'cover' }}
+                        unoptimized={image.src.startsWith('data:')}
+                      />
+                      {image.caption && (
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                          <p className="text-white text-sm">
+                            {image.caption}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        );
+
       default:
         return null;
     }
@@ -198,15 +298,17 @@ export default function DynamicLetterContent({ letterContent, letterInView }: Dy
       
       {letterContent.sections && letterContent.sections.length > 0 && letterContent.sections.map((section, sectionIndex) => {
         // Check if this is a new section structure with id and content array
-        if ('id' in section && 'content' in section && Array.isArray(section.content)) {
-          const sectionData = section as Section;
+        if ('id' in section && 'content' in section) {
+          const sectionData = section as Section | SimplifiedSection;
+          const contentArray = Array.isArray(sectionData.content) ? sectionData.content : [sectionData.content];
+
           return (
-            <div key={sectionData.id}>
+            <div key={sectionData.id || sectionIndex}>
               {/* Render divider if not the first section */}
               {sectionIndex > 0 && renderDivider(sectionData.dividerStyle)}
-              
+
               {/* Section anchor - positioned after divider for proper scroll targeting */}
-              <div id={`section-${sectionData.id}`} className="scroll-mt-32">
+              <div id={sectionData.id ? `section-${sectionData.id}` : `section-${sectionIndex}`} className="scroll-mt-32">
                 {/* Render section content */}
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -214,10 +316,14 @@ export default function DynamicLetterContent({ letterContent, letterInView }: Dy
                   transition={{ duration: 0.6, delay: 0.3 + sectionIndex * 0.02 }}
                   className="mb-12"
                 >
-                  {sectionData.content.length > 0 ? (
-                    sectionData.content.map((contentItem, contentIndex) => (
+                  {contentArray.length > 0 ? (
+                    contentArray.map((contentItem, contentIndex) => (
                       <div key={contentIndex}>
-                        {renderContentSection(contentItem, contentIndex)}
+                        {typeof contentItem === 'string' ? (
+                          <p className="text-base leading-relaxed text-gray-700 mb-4">{contentItem}</p>
+                        ) : (
+                          renderContentSection(contentItem as ContentSection, contentIndex)
+                        )}
                       </div>
                     ))
                   ) : (
@@ -229,7 +335,7 @@ export default function DynamicLetterContent({ letterContent, letterInView }: Dy
             </div>
           );
         } else {
-          // Legacy content structure support
+          // Direct content item (not a section with id)
           return (
             <motion.div
               key={sectionIndex}

@@ -29,10 +29,15 @@ const _schema = i.schema({
       title: i.string(),
       subtitle: i.string().optional(),
       excerpt: i.string(), // Short description for cards
-      content: i.any(), // JSON or markdown content
+      content: i.any(), // JSON or markdown content (legacy, kept for backward compatibility)
+      sections: i.any().optional(), // Structured content sections with images
+      editorMode: i.string().optional(), // 'simple' or 'advanced'
       thumbnail: i.string().optional(), // Card thumbnail image for homepage
       heroImage: i.string().optional(), // Hero image for essay page
+      heroTitle: i.string().optional(), // Custom title for hero section
+      heroSubtitle: i.string().optional(), // Custom subtitle for hero section
       coverImage: i.string().optional(), // Legacy field, keeping for compatibility
+      images: i.any().optional(), // JSON array of image references used in essay
       tags: i.any().optional(), // JSON array of tags
       featured: i.boolean().indexed(),
       published: i.boolean().indexed(),
