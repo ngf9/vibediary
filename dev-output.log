@@ -1,0 +1,29 @@
+
+> my-app@0.1.0 dev
+> next dev --turbopack
+
+   ▲ Next.js 15.5.2 (Turbopack)
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.86.27:3000
+
+ ✓ Starting...
+ ✓ Ready in 901ms
+ ○ Compiling / ...
+ ✓ Compiled / in 2.3s
+ GET / 200 in 2699ms
+ GET / 200 in 172ms
+ ✓ Compiled /favicon.ico in 170ms
+ GET /favicon.ico?favicon.0b3bf435.ico 200 in 436ms
+ ✓ Compiled in 371ms
+ ✓ Compiled / in 55ms
+ GET / 200 in 302ms
+ ✓ Compiled in 439ms
+ GET / 200 in 346ms
+ ✓ Compiled in 173ms
+ ✓ Compiled / in 106ms
+ GET / 200 in 432ms
+ ✓ Compiled in 136ms
+ ✓ Compiled in 96ms
+ ✓ Compiled / in 66ms
+ GET / 200 in 304ms
+[?25h
