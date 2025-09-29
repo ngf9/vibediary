@@ -82,6 +82,14 @@ const _schema = i.schema({
     }),
   },
   links: {},
+  rooms: {
+    sitePresence: {
+      presence: i.entity({
+        name: i.string().optional(),
+        joinedAt: i.number(),
+      }),
+    },
+  },
 });
 
 // TypeScript helpers for better intellisense

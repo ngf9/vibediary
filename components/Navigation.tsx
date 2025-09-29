@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import ModernTabNavigation from './ModernTabNavigation';
 import { motion, AnimatePresence } from 'motion/react';
+import { usePresence } from '@/hooks/usePresence';
 
 interface Essay {
   id: string;
@@ -21,6 +22,9 @@ export default function Navigation({ essays = [] }: NavigationProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileEssaysOpen, setIsMobileEssaysOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Get visitor count from presence hook
+  const { visitorCount } = usePresence();
 
 
   const navigationTabs = [
@@ -70,6 +74,11 @@ export default function Navigation({ essays = [] }: NavigationProps) {
               setIsDropdownOpen={setIsDropdownOpen}
               dropdownRef={dropdownRef}
             />
+
+            {/* Active Readers Counter */}
+            <div className="text-gray-700">
+              <span className="text-sm font-medium italic">Active Readers: {visitorCount}</span>
+            </div>
           </div>
 
           {/* Mobile Menu Button */}
@@ -111,6 +120,13 @@ export default function Navigation({ essays = [] }: NavigationProps) {
                   </li>
                 ))}
               </ul>
+
+              {/* Active Readers Counter for Mobile */}
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <div className="text-center text-gray-700">
+                  <span className="text-sm font-medium italic">Active Readers: {visitorCount}</span>
+                </div>
+              </div>
             </div>
           </motion.div>
         )}
