@@ -153,7 +153,7 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
   }) : '';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+    <div className="min-h-screen bg-white">
       <Navigation essays={allEssays} />
 
       {/* Hero Section with Image Background */}
@@ -225,7 +225,7 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
                 {essay.tags.map((tag, index) => (
                   <span
                     key={index}
-                    className="px-3 py-1 bg-white/20 backdrop-blur-sm text-white rounded-full text-sm"
+                    className="px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-full text-sm"
                   >
                     {tag}
                   </span>
@@ -302,7 +302,7 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
                   {essay.tags.map((tag, index) => (
                     <span
                       key={index}
-                      className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
+                      className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-full text-sm"
                     >
                       {tag}
                     </span>

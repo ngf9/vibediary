@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Ubuntu, Dancing_Script, Montserrat } from "next/font/google";
+import { Ubuntu, Dancing_Script, Montserrat, Great_Vibes } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
 
@@ -23,6 +23,13 @@ const montserrat = Montserrat({
   variable: "--font-montserrat",
 });
 
+const greatVibes = Great_Vibes({
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-great-vibes",
+});
+
 export const metadata: Metadata = {
   title: "Diary of a Vibe Coder",
   description: "A collection of projects and essays on building with AI and vibe coding.",
@@ -41,7 +48,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${ubuntu.className} ${dancingScript.variable} ${montserrat.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${ubuntu.className} ${dancingScript.variable} ${montserrat.variable} ${greatVibes.variable}`} suppressHydrationWarning>
       <head>
         <style>{`
           :root {

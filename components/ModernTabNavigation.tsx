@@ -143,7 +143,7 @@ export default function ModernTabNavigation({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -5 }}
                   transition={{ duration: 0.15, ease: [0.32, 0.72, 0, 1] }}
-                  className="absolute left-0 min-w-[240px] bg-white/50 backdrop-blur-xl rounded-lg shadow-lg overflow-hidden z-50"
+                  className="absolute left-0 min-w-[320px] bg-white/50 backdrop-blur-xl rounded-lg shadow-lg overflow-hidden z-50"
                   style={{
                     top: 'calc(100% + 8px)',
                     boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04)',
@@ -165,7 +165,7 @@ export default function ModernTabNavigation({
                           ${index !== 0 ? 'border-t border-gray-200/20' : ''}
                         `}
                       >
-                        <span className="block">
+                        <span className="block whitespace-nowrap">
                           {subItem.label}
                         </span>
                       </button>

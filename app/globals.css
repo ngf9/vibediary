@@ -5,6 +5,10 @@
   font-family: var(--font-montserrat);
 }
 
+.font-great-vibes {
+  font-family: var(--font-great-vibes);
+}
+
 /* Hide scrollbar for horizontal scrollable navigation */
 .scrollbar-hide {
   -ms-overflow-style: none;  /* IE and Edge */

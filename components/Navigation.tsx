@@ -24,7 +24,6 @@ export default function Navigation({ essays = [] }: NavigationProps) {
 
 
   const navigationTabs = [
-    { id: 'home', label: 'Home', href: '/' },
     {
       id: 'essays',
       label: 'Essays',
@@ -62,7 +61,7 @@ export default function Navigation({ essays = [] }: NavigationProps) {
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 px-8 md:px-12 lg:px-16 py-4 md:py-6 bg-white bg-opacity-90 backdrop-blur-sm">
         <div className="flex items-center justify-between max-w-screen-2xl mx-auto">
-          <div 
+          <div
             className="text-xl font-bold text-black cursor-pointer"
             onClick={() => router.push('/')}
           >

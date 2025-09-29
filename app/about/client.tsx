@@ -7,6 +7,12 @@ import Image from 'next/image';
 import { motion, useInView } from 'motion/react';
 import { useRef } from 'react';
 
+interface Essay {
+  id: string;
+  slug: string;
+  title: string;
+}
+
 interface AboutPageClientProps {
   philosophyContent?: string[];
   milestones?: Array<{
@@ -15,6 +21,7 @@ interface AboutPageClientProps {
     date: string;
     description: string;
   }>;
+  essays?: Essay[];
 }
 
 export default function AboutPageClient({
@@ -53,7 +60,8 @@ export default function AboutPageClient({
       date: "2025",
       description: "Expanding with new courses, tools, and a thriving builder community"
     }
-  ]
+  ],
+  essays = []
 }: AboutPageClientProps) {
   // Refs for scroll animations
   const philosophyRef = useRef(null);
@@ -74,7 +82,7 @@ export default function AboutPageClient({
         <div className="aurora-strip aurora-5" />
       </div>
 
-      <Navigation />
+      <Navigation essays={essays} />
 
       <div className="relative z-10 pt-32">
         {/* Header */}
