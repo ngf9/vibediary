@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Navigation from './Navigation';
-import HeroSection from './HeroSection';
 import EssayList from './EssayList';
 
 interface Essay {
@@ -41,15 +40,7 @@ export default function SimpleLayout({ essays, allEssays }: SimpleLayoutProps) {
       <Navigation essays={allEssays} />
 
       {/* Main Content */}
-      <div className="pt-32 pb-16">
-        {/* Hero Section */}
-        <HeroSection />
-
-        {/* Subtle divider */}
-        <div className="max-w-4xl mx-auto px-8 py-8">
-          <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
-        </div>
-
+      <div className="pt-24 pb-16">
         {/* Essay List */}
         <EssayList essays={sortedEssays} />
       </div>

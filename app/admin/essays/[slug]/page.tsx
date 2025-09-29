@@ -6,7 +6,13 @@ import Link from 'next/link';
 import { db } from '@/lib/instant';
 import { id } from '@instantdb/react';
 import { motion } from 'framer-motion';
-import SectionEditor from '@/components/admin/SectionEditor';
+import dynamic from 'next/dynamic';
+
+// Dynamically import MarkdownEditor to avoid SSR issues
+const MarkdownEditor = dynamic(
+  () => import('@/components/admin/MarkdownEditor'),
+  { ssr: false, loading: () => <div className="h-96 bg-gray-50 rounded-lg animate-pulse" /> }
+);
 
 export default function EditEssayPage() {
   const router = useRouter();
@@ -31,8 +37,6 @@ export default function EditEssayPage() {
   const [published, setPublished] = useState(false);
   const [readTime, setReadTime] = useState(5);
   const [newTag, setNewTag] = useState('');
-  const [editorMode, setEditorMode] = useState<'simple' | 'advanced'>('simple');
-  const [sections, setSections] = useState<any[]>([]);
 
   // Fetch existing essay if editing
   const { data: essayData } = db.useQuery(
@@ -61,16 +65,22 @@ export default function EditEssayPage() {
       setFeatured(essay.featured || false);
       setPublished(essay.published || false);
       setReadTime(essay.readTime || 5);
-      setEditorMode(essay.editorMode || 'simple');
-      if (essay.sections) {
-        setSections(essay.sections);
-      }
     }
   }, [isNew, essayData]);
 
-  // Auto-calculate reading time based on content
+  // Auto-calculate reading time based on markdown content
   useEffect(() => {
-    const wordCount = content.split(/\s+/).filter(word => word.length > 0).length;
+    // Remove markdown syntax for more accurate word count
+    const plainText = content
+      .replace(/^#{1,6}\s+/gm, '') // Remove headers
+      .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1') // Remove links, keep text
+      .replace(/\*{1,2}([^\*]+)\*{1,2}/g, '$1') // Remove bold/italic
+      .replace(/`([^`]+)`/g, '$1') // Remove inline code
+      .replace(/```[\s\S]*?```/g, '') // Remove code blocks
+      .replace(/^[\-\*\+]\s+/gm, '') // Remove list markers
+      .replace(/^>\s+/gm, ''); // Remove blockquotes
+
+    const wordCount = plainText.split(/\s+/).filter(word => word.length > 0).length;
     const estimatedTime = Math.max(1, Math.ceil(wordCount / 200)); // 200 words per minute
     setReadTime(estimatedTime);
   }, [content]);
@@ -110,8 +120,6 @@ export default function EditEssayPage() {
             featured,
             published,
             readTime,
-            editorMode,
-            sections: editorMode === 'advanced' ? sections : null,
             createdAt: now,
             publishedAt: published ? now : null,
             updatedAt: now
@@ -138,8 +146,6 @@ export default function EditEssayPage() {
               featured,
               published,
               readTime,
-              editorMode,
-              sections: editorMode === 'advanced' ? sections : null,
               publishedAt: !wasPublished && published ? now : essay.publishedAt,
               updatedAt: now
             })
@@ -264,66 +270,51 @@ export default function EditEssayPage() {
             <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg shadow-gray-200/50 border border-gray-100 p-6">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-semibold text-gray-900">Content</h2>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setEditorMode('simple')}
-                    className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-                      editorMode === 'simple'
-                        ? 'bg-purple-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    Simple Editor
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setEditorMode('advanced')}
-                    className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-                      editorMode === 'advanced'
-                        ? 'bg-purple-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    Advanced Editor
-                  </button>
-                </div>
+                <span className="text-sm text-gray-500">
+                  Estimated read time: {readTime} min
+                </span>
               </div>
 
               <div className="space-y-4">
-                {editorMode === 'simple' ? (
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <label className="block text-sm font-medium text-gray-700">
-                        Essay Content <span className="text-red-500">*</span>
-                      </label>
-                      <span className="text-sm text-gray-500">
-                        Estimated read time: {readTime} min
-                      </span>
-                    </div>
-                    <textarea
-                      value={content}
-                      onChange={(e) => setContent(e.target.value)}
-                      required={editorMode === 'simple'}
-                      rows={20}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent font-mono text-sm"
-                      placeholder="Write your essay here... (Markdown supported)"
-                    />
-                    <p className="mt-2 text-xs text-gray-500">
-                      Supports Markdown formatting. Word count: {content.split(/\s+/).filter(word => word.length > 0).length}
+                <div>
+                  <div className="mb-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Essay Content <span className="text-red-500">*</span>
+                    </label>
+                    <p className="text-xs text-gray-500 mb-3">
+                      Write your essay using Markdown. You can format text with **bold**, *italic*, create lists, add images, and more.
                     </p>
                   </div>
-                ) : (
-                  <div>
-                    <p className="text-sm text-gray-600 mb-4">
-                      Use the advanced editor to create structured content with multiple sections, images, and rich formatting.
-                    </p>
-                    <SectionEditor
-                      sections={sections}
-                      onSectionsChange={setSections}
-                    />
-                  </div>
-                )}
+                  <MarkdownEditor
+                    value={content}
+                    onChange={setContent}
+                    placeholder="Start writing your essay in markdown...
+
+# Example Heading
+
+Write your paragraphs here. You can add **bold text**, *italic text*, and even [links](https://example.com).
+
+## Sub-heading
+
+- Create bullet lists
+- Add multiple items
+- Format as needed
+
+You can also add images:
+![Alt text](image-url.jpg)
+
+> Add blockquotes for emphasis
+
+```javascript
+// Add code blocks with syntax highlighting
+const example = 'code';
+```"
+                    height={500}
+                  />
+                  <p className="mt-2 text-xs text-gray-500">
+                    Word count: {content.split(/\s+/).filter(word => word.length > 0).length} • Character count: {content.length}
+                  </p>
+                </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">

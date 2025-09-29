@@ -1,6 +1,8 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import Image from 'next/image';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface ContentItem {
   type: string;
@@ -57,6 +59,112 @@ export default function DynamicLetterContent({ letterContent, letterInView }: Dy
     return null;
   }
 
+  // Check if content looks like markdown (contains common markdown patterns)
+  const isMarkdown = (text: string): boolean => {
+    const markdownPatterns = [
+      /^#{1,6}\s+/m, // Headers
+      /\*\*[^*]+\*\*/,  // Bold
+      /\*[^*]+\*/,      // Italic
+      /\[.*\]\(.*\)/,   // Links
+      /^[\*\-\+]\s+/m,  // Lists
+      /^>\s+/m,         // Blockquotes
+      /```[\s\S]*?```/, // Code blocks
+      /`[^`]+`/,        // Inline code
+      /!\[.*\]\(.*\)/,  // Images
+    ];
+
+    return markdownPatterns.some(pattern => pattern.test(text));
+  };
+
+  // Render markdown content with proper styling
+  const renderMarkdownContent = (content: string, index: number) => {
+    return (
+      <motion.div
+        key={index}
+        initial={{ opacity: 0 }}
+        animate={letterInView ? { opacity: 1 } : { opacity: 0 }}
+        transition={{ duration: 0.6, delay: 0.3 + index * 0.02 }}
+        className="prose prose-lg max-w-none"
+      >
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          components={{
+            h1: ({ children }) => <h1 className="text-4xl font-bold mt-8 mb-4 text-gray-900">{children}</h1>,
+            h2: ({ children }) => <h2 className="text-3xl font-semibold mt-6 mb-3 text-gray-900">{children}</h2>,
+            h3: ({ children }) => <h3 className="text-2xl font-semibold mt-5 mb-2 text-gray-900">{children}</h3>,
+            h4: ({ children }) => <h4 className="text-xl font-medium mt-4 mb-2 text-gray-800">{children}</h4>,
+            p: ({ children }) => <p className="text-base leading-relaxed text-gray-700 mb-4">{children}</p>,
+            ul: ({ children }) => <ul className="space-y-2 mb-6 text-gray-700">{children}</ul>,
+            ol: ({ children }) => <ol className="space-y-2 mb-6 text-gray-700 list-decimal list-inside">{children}</ol>,
+            li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+            blockquote: ({ children }) => (
+              <blockquote className="border-l-4 border-purple-500 pl-4 py-2 my-6 italic text-gray-600">
+                {children}
+              </blockquote>
+            ),
+            code: ({ className, children, ...props }) => {
+              const match = /language-(\w+)/.exec(className || '');
+              const isInline = !match;
+
+              if (isInline) {
+                return (
+                  <code className="bg-gray-100 text-purple-600 px-1 py-0.5 rounded text-sm font-mono" {...props}>
+                    {children}
+                  </code>
+                );
+              }
+
+              return (
+                <code className={`${className} block bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto font-mono text-sm my-4`} {...props}>
+                  {children}
+                </code>
+              );
+            },
+            pre: ({ children }) => <pre className="bg-gray-900 rounded-lg overflow-hidden my-4">{children}</pre>,
+            img: ({ src, alt }) => (
+              <span className="block my-6">
+                <Image
+                  src={src || ''}
+                  alt={alt || ''}
+                  width={800}
+                  height={600}
+                  className="w-full h-auto rounded-lg shadow-lg"
+                  style={{ objectFit: 'cover' }}
+                  unoptimized={src?.startsWith('data:')}
+                />
+              </span>
+            ),
+            a: ({ href, children }) => (
+              <a href={href} className="text-purple-600 hover:text-purple-700 underline" target="_blank" rel="noopener noreferrer">
+                {children}
+              </a>
+            ),
+            strong: ({ children }) => <strong className="font-semibold text-gray-900">{children}</strong>,
+            em: ({ children }) => <em className="italic">{children}</em>,
+            hr: () => <hr className="my-8 border-gray-300" />,
+            table: ({ children }) => (
+              <table className="w-full my-4 border-collapse">
+                {children}
+              </table>
+            ),
+            th: ({ children }) => (
+              <th className="border border-gray-300 px-4 py-2 bg-gray-100 font-semibold text-left">
+                {children}
+              </th>
+            ),
+            td: ({ children }) => (
+              <td className="border border-gray-300 px-4 py-2">
+                {children}
+              </td>
+            ),
+          }}
+        >
+          {content}
+        </ReactMarkdown>
+      </motion.div>
+    );
+  };
+
   const renderDivider = (style?: string) => {
     switch(style) {
       case 'dots':
@@ -85,9 +193,14 @@ export default function DynamicLetterContent({ letterContent, letterInView }: Dy
   const renderContentSection = (section: ContentSection, index: number) => {
     switch (section.type) {
       case 'paragraph':
+        const paragraphContent = typeof section.content === 'string' ? section.content : '';
+        // Check if paragraph content is markdown
+        if (paragraphContent && isMarkdown(paragraphContent)) {
+          return renderMarkdownContent(paragraphContent, index);
+        }
         return (
           <p key={index} className="text-base leading-relaxed text-gray-700 mb-4">
-            {typeof section.content === 'string' ? section.content : ''}
+            {paragraphContent}
           </p>
         );
       
@@ -320,7 +433,12 @@ export default function DynamicLetterContent({ letterContent, letterInView }: Dy
                     contentArray.map((contentItem, contentIndex) => (
                       <div key={contentIndex}>
                         {typeof contentItem === 'string' ? (
-                          <p className="text-base leading-relaxed text-gray-700 mb-4">{contentItem}</p>
+                          // Check if the string content is markdown
+                          isMarkdown(contentItem) ? (
+                            renderMarkdownContent(contentItem, contentIndex)
+                          ) : (
+                            <p className="text-base leading-relaxed text-gray-700 mb-4">{contentItem}</p>
+                          )
                         ) : (
                           renderContentSection(contentItem as ContentSection, contentIndex)
                         )}

@@ -24,16 +24,6 @@ export default function Navigation({ essays = [] }: NavigationProps) {
 
 
   const navigationTabs = [
-    {
-      id: 'essays',
-      label: 'Essays',
-      href: '#',
-      subItems: essays.map(essay => ({
-        id: essay.slug,
-        label: essay.title,
-        href: `/essays/${essay.slug}`
-      }))
-    },
     { id: 'about', label: 'About', href: '/about' },
   ];
 
@@ -59,13 +49,17 @@ export default function Navigation({ essays = [] }: NavigationProps) {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 px-8 md:px-12 lg:px-16 py-4 md:py-6 bg-white bg-opacity-90 backdrop-blur-sm">
+      <nav className="fixed top-0 left-0 right-0 z-50 px-8 md:px-12 lg:px-16 py-4 md:py-6 bg-white/50 backdrop-blur-sm">
         <div className="flex items-center justify-between max-w-screen-2xl mx-auto">
           <div
-            className="text-xl font-bold text-black cursor-pointer"
+            className="text-xl text-black cursor-pointer"
             onClick={() => router.push('/')}
           >
-            Diary of a Vibe Coder
+            <span className="hidden md:block">
+              <span className="font-bold">Diary of a Vibe Coder,</span>
+              <span className="font-normal italic"> a collection of essays on building with AI.</span>
+            </span>
+            <span className="md:hidden font-bold">Diary of a Vibe Coder</span>
           </div>
           
           {/* Desktop Navigation */}
@@ -108,52 +102,12 @@ export default function Navigation({ essays = [] }: NavigationProps) {
               <ul className="space-y-2">
                 {navigationTabs.map((tab) => (
                   <li key={tab.id}>
-                    {tab.subItems ? (
-                      <>
-                        <button
-                          onClick={() => setIsMobileEssaysOpen(!isMobileEssaysOpen)}
-                          className="w-full text-left px-4 py-3 hover:bg-gray-50 rounded-lg transition-colors text-gray-800 flex items-center justify-between"
-                        >
-                          <span>{tab.label}</span>
-                          <svg
-                            className={`w-4 h-4 transition-transform ${isMobileEssaysOpen ? 'rotate-180' : ''}`}
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </button>
-                        <AnimatePresence>
-                          {isMobileEssaysOpen && (
-                            <motion.ul
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: 'auto', opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              className="overflow-hidden"
-                            >
-                              {tab.subItems.map((subItem) => (
-                                <li key={subItem.id}>
-                                  <button
-                                    onClick={() => handleNavClick(subItem.href)}
-                                    className="w-full text-left px-8 py-2.5 hover:bg-gray-50 rounded-lg transition-colors text-gray-600 text-sm"
-                                  >
-                                    {subItem.label}
-                                  </button>
-                                </li>
-                              ))}
-                            </motion.ul>
-                          )}
-                        </AnimatePresence>
-                      </>
-                    ) : (
-                      <button
-                        onClick={() => handleNavClick(tab.href)}
-                        className="w-full text-left px-4 py-3 hover:bg-gray-50 rounded-lg transition-colors text-gray-800"
-                      >
-                        {tab.label}
-                      </button>
-                    )}
+                    <button
+                      onClick={() => handleNavClick(tab.href)}
+                      className="w-full text-left px-4 py-3 hover:bg-gray-50 rounded-lg transition-colors text-gray-800"
+                    >
+                      {tab.label}
+                    </button>
                   </li>
                 ))}
               </ul>
