@@ -55,7 +55,7 @@ function EmailStep({ onSendEmail }: { onSendEmail: (email: string) => void }) {
           <div className="flex justify-center mb-4">
             <img src="/favicon.ico" alt="Logo" className="w-16 h-16" />
           </div>
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2">Portfolio Admin</h2>
+          <h2 className="text-3xl font-bold text-black mb-2">Diary of a Vibe Coder Admin</h2>
           <p className="text-gray-600 font-light">Enter your email to receive a verification code</p>
         </div>
 
@@ -72,7 +72,7 @@ function EmailStep({ onSendEmail }: { onSendEmail: (email: string) => void }) {
           <input
             id="email"
             type="email"
-            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-purple-500/20 focus:border-transparent transition-all duration-200 text-gray-900"
+            className="w-full px-8 py-4 bg-white border border-gray-300 rounded-full focus:outline-none focus:ring-4 focus:ring-purple-500/20 focus:border-transparent transition-all duration-200 text-gray-900"
             placeholder="admin@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -91,7 +91,7 @@ function EmailStep({ onSendEmail }: { onSendEmail: (email: string) => void }) {
 
         <Link
           href="/"
-          className="block w-full py-4 px-8 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform active:scale-[0.98] text-center"
+          className="block w-full py-4 px-8 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform active:scale-[0.98] text-center"
         >
           Back to Home
         </Link>
@@ -151,7 +151,7 @@ function CodeStep({ sentEmail }: { sentEmail: string }) {
           <input
             id="code"
             type="text"
-            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-center text-2xl font-mono text-gray-900"
+            className="w-full px-8 py-4 bg-white border border-gray-300 rounded-full focus:outline-none focus:ring-4 focus:ring-purple-500/20 focus:border-transparent text-center text-2xl font-mono text-gray-900"
             placeholder="123456"
             value={code}
             onChange={(e) => setCode(e.target.value)}
@@ -172,7 +172,7 @@ function CodeStep({ sentEmail }: { sentEmail: string }) {
         <button
           type="button"
           onClick={() => window.location.reload()}
-          className="w-full py-4 px-8 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform active:scale-[0.98]"
+          className="w-full py-4 px-8 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform active:scale-[0.98]"
         >
           Use a different email
         </button>
