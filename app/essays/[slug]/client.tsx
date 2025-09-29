@@ -51,7 +51,60 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
   const heroTitle = essay.heroTitle || essay.title;
   const heroSubtitle = essay.heroSubtitle || essay.subtitle || '';
 
-  // If essay has structured sections or letterContent, use it. Otherwise, create a simple structure from content
+  // Helper function to parse markdown headers and create sections
+  const parseMarkdownSections = (markdown: string) => {
+    // Match only h2 headers (##) in the markdown for navigation
+    const headerRegex = /^(#{2})\s+(.+)$/gm;
+    const headers: Array<{ level: number; text: string; position: number }> = [];
+
+    let match;
+    while ((match = headerRegex.exec(markdown)) !== null) {
+      headers.push({
+        level: match[1].length,
+        text: match[2].trim(),
+        position: match.index
+      });
+    }
+
+    // If no headers found, return single section with all content
+    if (headers.length === 0) {
+      return [{
+        id: 'main-content',
+        title: '',
+        content: markdown,
+        type: 'paragraph',
+        navLabel: 'Essay'
+      }];
+    }
+
+    // Create sections from headers
+    const sections = headers.map((header, index) => {
+      const nextHeader = headers[index + 1];
+      const startPos = header.position;
+      const endPos = nextHeader ? nextHeader.position : markdown.length;
+
+      // Extract content from current header to next header (or end)
+      const sectionContent = markdown.substring(startPos, endPos).trim();
+
+      // Create slug from header text for ID
+      const id = header.text
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+
+      return {
+        id: id || `section-${index}`,
+        title: header.text,
+        content: sectionContent,
+        type: 'paragraph',
+        navLabel: header.text
+      };
+    });
+
+    return sections;
+  };
+
+  // If essay has structured sections or letterContent, use it. Otherwise, create from markdown
   const letterContent = essay.letterContent ||
     (essay.sections && essay.sections.length > 0 ? {
       title: essay.title,
@@ -60,13 +113,7 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
     } : {
       title: essay.title,
       subtitle: essay.subtitle,
-      sections: essay.content ? [{
-        id: 'main-content',
-        title: '',
-        content: essay.content,
-        type: 'text',
-        navLabel: 'Essay'
-      }] : []
+      sections: essay.content ? parseMarkdownSections(essay.content) : []
     });
 
   // Scroll progress tracking

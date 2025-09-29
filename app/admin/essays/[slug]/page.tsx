@@ -31,6 +31,8 @@ export default function EditEssayPage() {
   const [content, setContent] = useState('');
   const [thumbnail, setThumbnail] = useState('');
   const [heroImage, setHeroImage] = useState('');
+  const [heroTitle, setHeroTitle] = useState('');
+  const [heroSubtitle, setHeroSubtitle] = useState('');
   const [coverImage, setCoverImage] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [featured, setFeatured] = useState(false);
@@ -60,6 +62,8 @@ export default function EditEssayPage() {
       setContent(essay.content || '');
       setThumbnail(essay.thumbnail || '');
       setHeroImage(essay.heroImage || '');
+      setHeroTitle(essay.heroTitle || '');
+      setHeroSubtitle(essay.heroSubtitle || '');
       setCoverImage(essay.coverImage || '');
       setTags(essay.tags || []);
       setFeatured(essay.featured || false);
@@ -115,6 +119,8 @@ export default function EditEssayPage() {
             content,
             thumbnail: thumbnail || null,
             heroImage: heroImage || null,
+            heroTitle: heroTitle || null,
+            heroSubtitle: heroSubtitle || null,
             coverImage: coverImage || null,
             tags,
             featured,
@@ -141,6 +147,8 @@ export default function EditEssayPage() {
               content,
               thumbnail: thumbnail || null,
               heroImage: heroImage || null,
+              heroTitle: heroTitle || null,
+              heroSubtitle: heroSubtitle || null,
               coverImage: coverImage || null,
               tags,
               featured,
@@ -345,6 +353,38 @@ const example = 'code';
                   />
                   <p className="mt-1 text-xs text-gray-500">
                     Large image displayed on the essay page. Use relative path for public folder images.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Hero Title (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={heroTitle}
+                    onChange={(e) => setHeroTitle(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="Custom hero title for essay page"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">
+                    Overrides the main title in the hero section. Leave empty to use the main title.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Hero Subtitle (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={heroSubtitle}
+                    onChange={(e) => setHeroSubtitle(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="Custom hero subtitle for essay page"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">
+                    Overrides the main subtitle in the hero section. Leave empty to use the main subtitle.
                   </p>
                 </div>
               </div>

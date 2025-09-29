@@ -29,7 +29,7 @@ const _schema = i.schema({
       title: i.string(),
       subtitle: i.string().optional(),
       excerpt: i.string(), // Short description for cards
-      content: i.any(), // JSON or markdown content (legacy, kept for backward compatibility)
+      content: i.string(), // Markdown content as string
       sections: i.any().optional(), // Structured content sections with images
       editorMode: i.string().optional(), // 'simple' or 'advanced'
       thumbnail: i.string().optional(), // Card thumbnail image for homepage

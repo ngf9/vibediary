@@ -176,13 +176,14 @@ export default function LetterSectionNav({
                           </div>
                           
                           {/* Label */}
-                          <span 
+                          <span
                             className={cn(
-                              "text-sm whitespace-nowrap transition-all duration-300",
-                              currentSection === section.id 
+                              "text-sm whitespace-nowrap truncate max-w-[180px] transition-all duration-300",
+                              currentSection === section.id
                                 ? "text-gray-900 font-semibold"
                                 : "text-gray-600 group-hover:text-gray-800"
                             )}
+                            title={section.navLabel}
                           >
                             {section.navLabel}
                           </span>
