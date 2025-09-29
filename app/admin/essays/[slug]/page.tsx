@@ -6,11 +6,14 @@ import Link from 'next/link';
 import { db } from '@/lib/instant';
 import { id } from '@instantdb/react';
 import { motion } from 'framer-motion';
-import dynamic from 'next/dynamic';
+import dynamicImport from 'next/dynamic';
 import { parseMarkdownToJson } from '@/lib/markdown-parser';
 
+// Force dynamic rendering for admin pages
+export const dynamic = 'force-dynamic';
+
 // Dynamically import SimpleMarkdownEditor to avoid SSR issues
-const SimpleMarkdownEditor = dynamic(
+const SimpleMarkdownEditor = dynamicImport(
   () => import('@/components/admin/SimpleMarkdownEditor'),
   { ssr: false, loading: () => <div className="h-96 bg-gray-50 rounded-lg animate-pulse" /> }
 );

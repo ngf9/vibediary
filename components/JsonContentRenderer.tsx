@@ -28,7 +28,7 @@ export default function JsonContentRenderer({ sections, inView = true }: JsonCon
             {section.level === 1 && (
               <h1
                 id={section.id}
-                className="text-4xl font-bold mt-8 mb-4 text-gray-900 scroll-mt-[130px] lg:scroll-mt-[110px]"
+                className="text-2xl sm:text-3xl md:text-4xl font-bold mt-6 sm:mt-8 mb-3 sm:mb-4 text-gray-900 scroll-mt-[130px] lg:scroll-mt-[110px]"
               >
                 {section.content}
               </h1>
@@ -36,7 +36,7 @@ export default function JsonContentRenderer({ sections, inView = true }: JsonCon
             {section.level === 2 && (
               <h2
                 id={section.id}
-                className="text-3xl font-semibold mt-16 mb-4 text-gray-900 scroll-mt-[130px] lg:scroll-mt-[110px]"
+                className="text-xl sm:text-2xl md:text-3xl font-semibold mt-10 sm:mt-12 md:mt-16 mb-3 sm:mb-4 text-gray-900 scroll-mt-[130px] lg:scroll-mt-[110px]"
               >
                 {section.content}
               </h2>
@@ -44,7 +44,7 @@ export default function JsonContentRenderer({ sections, inView = true }: JsonCon
             {section.level === 3 && (
               <h3
                 id={section.id}
-                className="text-2xl font-semibold mt-4 mb-2 text-gray-900 scroll-mt-[130px] lg:scroll-mt-[110px]"
+                className="text-lg sm:text-xl md:text-2xl font-semibold mt-6 sm:mt-8 mb-2 sm:mb-3 text-gray-900 scroll-mt-[130px] lg:scroll-mt-[110px]"
               >
                 {section.content}
               </h3>
@@ -52,7 +52,7 @@ export default function JsonContentRenderer({ sections, inView = true }: JsonCon
             {section.level === 4 && (
               <h4
                 id={section.id}
-                className="text-xl font-medium mt-3 mb-2 text-gray-800 scroll-mt-[130px] lg:scroll-mt-[110px]"
+                className="text-base sm:text-lg md:text-xl font-medium mt-4 sm:mt-5 mb-2 text-gray-800 scroll-mt-[130px] lg:scroll-mt-[110px]"
               >
                 {section.content}
               </h4>
@@ -67,7 +67,7 @@ export default function JsonContentRenderer({ sections, inView = true }: JsonCon
             initial={{ opacity: 0, y: 20 }}
             animate={inView ? { opacity: 1, y: 0 } : { opacity: 0 }}
             transition={{ duration: 0.5, delay: baseDelay }}
-            className="prose prose-lg max-w-none mb-6"
+            className="prose prose-sm sm:prose-base lg:prose-lg max-w-none mb-4 sm:mb-6"
           >
             <ReactMarkdown remarkPlugins={[remarkGfm]}>
               {section.content || ''}
@@ -82,19 +82,19 @@ export default function JsonContentRenderer({ sections, inView = true }: JsonCon
             initial={{ opacity: 0, scale: 0.95 }}
             animate={inView ? { opacity: 1, scale: 1 } : { opacity: 0 }}
             transition={{ duration: 0.6, delay: baseDelay }}
-            className="my-8"
+            className="my-4 sm:my-6 lg:my-8 -mx-4 sm:mx-0"
           >
             <Image
               src={section.src || ''}
               alt={section.alt || 'Image'}
               width={800}
               height={600}
-              className="w-full h-auto rounded-lg shadow-lg"
+              className="w-full h-auto rounded-none sm:rounded-lg shadow-md sm:shadow-lg"
               style={{ objectFit: 'cover' }}
               unoptimized={section.src?.startsWith('data:')}
             />
             {section.caption && (
-              <figcaption className="text-center text-sm text-gray-600 mt-2 italic">
+              <figcaption className="text-center text-xs sm:text-sm text-gray-600 mt-2 italic px-4 sm:px-0">
                 {section.caption}
               </figcaption>
             )}
@@ -108,16 +108,16 @@ export default function JsonContentRenderer({ sections, inView = true }: JsonCon
             initial={{ opacity: 0, y: 20 }}
             animate={inView ? { opacity: 1, y: 0 } : { opacity: 0 }}
             transition={{ duration: 0.5, delay: baseDelay }}
-            className="mb-8"
+            className="mb-6 sm:mb-8"
           >
             {section.ordered ? (
-              <ol className="space-y-2 text-gray-700 list-decimal list-inside">
+              <ol className="space-y-2 text-sm sm:text-base text-gray-700 list-decimal list-inside pl-1">
                 {section.items?.map((item, i) => (
                   <li key={i} className="leading-relaxed">{item}</li>
                 ))}
               </ol>
             ) : (
-              <ul className="space-y-2 text-gray-700 list-disc list-inside">
+              <ul className="space-y-2 text-sm sm:text-base text-gray-700 list-disc list-inside pl-1">
                 {section.items?.map((item, i) => (
                   <li key={i} className="leading-relaxed">{item}</li>
                 ))}
@@ -133,10 +133,10 @@ export default function JsonContentRenderer({ sections, inView = true }: JsonCon
             initial={{ opacity: 0 }}
             animate={inView ? { opacity: 1 } : { opacity: 0 }}
             transition={{ duration: 0.5, delay: baseDelay }}
-            className="my-6"
+            className="my-4 sm:my-6 -mx-4 sm:mx-0"
           >
-            <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto">
-              <code className="text-sm font-mono">
+            <pre className="bg-gray-900 text-gray-100 p-3 sm:p-4 rounded-none sm:rounded-lg overflow-x-auto">
+              <code className="text-xs sm:text-sm font-mono">
                 {section.content}
               </code>
             </pre>
@@ -150,7 +150,7 @@ export default function JsonContentRenderer({ sections, inView = true }: JsonCon
             initial={{ opacity: 0, x: -20 }}
             animate={inView ? { opacity: 1, x: 0 } : { opacity: 0 }}
             transition={{ duration: 0.5, delay: baseDelay }}
-            className="border-l-4 border-purple-500 pl-4 py-2 my-6 italic text-gray-600"
+            className="border-l-3 sm:border-l-4 border-purple-500 pl-3 sm:pl-4 py-2 my-4 sm:my-6 italic text-sm sm:text-base text-gray-600"
           >
             <ReactMarkdown remarkPlugins={[remarkGfm]}>
               {section.content || ''}
@@ -165,7 +165,7 @@ export default function JsonContentRenderer({ sections, inView = true }: JsonCon
             initial={{ scaleX: 0 }}
             animate={inView ? { scaleX: 1 } : { scaleX: 0 }}
             transition={{ duration: 0.5, delay: baseDelay }}
-            className="my-6 border-gray-300"
+            className="my-4 sm:my-6 border-gray-300"
           />
         );
 

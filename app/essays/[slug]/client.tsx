@@ -16,7 +16,7 @@ interface Essay {
   title: string;
   subtitle?: string;
   excerpt?: string;
-  contentJson: {
+  contentJson?: {
     sections: ContentSection[];
     metadata?: any;
   };
@@ -29,6 +29,7 @@ interface Essay {
   tags?: string[];
   thumbnail?: string;
   color?: string;
+  editorMode?: 'simple' | 'advanced';
 }
 
 interface EssayClientProps {
@@ -42,6 +43,7 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
 
   // Extract navigation from H2 headings in contentJson
   const sections = useMemo(() => {
+    if (!essay.contentJson) return [];
     const extracted = essay.contentJson.sections
       .filter(section => section.type === 'heading' && section.level === 2)
       .map(section => ({
@@ -183,10 +185,10 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
           </motion.div>
 
           {/* Hero Content */}
-          <div className="relative z-10 text-center text-white px-8 max-w-4xl mx-auto">
+          <div className="relative z-10 text-center text-white px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
             {publicationDate && (
               <motion.p
-                className="text-sm font-medium text-white/90 mb-4 tracking-wider uppercase"
+                className="text-xs sm:text-sm font-medium text-white/90 mb-3 sm:mb-4 tracking-wider uppercase"
                 initial={{ opacity: 0, y: 30 }}
                 animate={heroInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
                 transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
@@ -196,7 +198,7 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
             )}
 
             <motion.h1
-              className="text-6xl lg:text-7xl font-bold mb-6"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-6"
               initial={{ opacity: 0, y: 30 }}
               animate={heroInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
               transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
@@ -206,7 +208,7 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
 
             {heroSubtitle && (
               <motion.p
-                className="text-xl lg:text-2xl mb-8 font-light leading-relaxed"
+                className="text-base sm:text-lg md:text-xl lg:text-2xl mb-6 sm:mb-8 font-light leading-relaxed"
                 initial={{ opacity: 0, y: 30 }}
                 animate={heroInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
                 transition={{ duration: 0.8, delay: 0.7, ease: "easeOut" }}
@@ -225,7 +227,7 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
                 {essay.tags.map((tag, index) => (
                   <span
                     key={index}
-                    className="px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-full text-sm"
+                    className="px-3 py-1.5 sm:px-4 sm:py-2 bg-white/20 backdrop-blur-sm text-white rounded-full text-xs sm:text-sm"
                   >
                     {tag}
                   </span>
@@ -254,7 +256,7 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
         /* Fallback Hero Section without Image */
         <motion.section
           ref={heroRef}
-          className="relative min-h-[60vh] flex items-center justify-center px-8 pt-32 pb-20 overflow-hidden"
+          className="relative min-h-[60vh] flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 lg:pt-32 pb-16 sm:pb-20 overflow-hidden"
           initial={{ opacity: 0 }}
           animate={{ opacity: heroInView ? 1 : 0 }}
           transition={{ duration: 0.8 }}
@@ -285,24 +287,24 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
               transition={{ delay: 0.2, duration: 0.8 }}
             >
               {publicationDate && (
-                <p className="text-sm font-medium text-gray-600 mb-4 tracking-wider uppercase">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 mb-3 sm:mb-4 tracking-wider uppercase">
                   {publicationDate}
                 </p>
               )}
-              <h1 className="text-5xl md:text-7xl font-bold mb-6 text-gray-900 leading-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-6 text-gray-900 leading-tight">
                 {heroTitle}
               </h1>
               {heroSubtitle && (
-                <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto font-light">
+                <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 max-w-3xl mx-auto font-light">
                   {heroSubtitle}
                 </p>
               )}
               {essay.tags && essay.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2 justify-center mt-6">
+                <div className="flex flex-wrap gap-2 justify-center mt-4 sm:mt-6">
                   {essay.tags.map((tag, index) => (
                     <span
                       key={index}
-                      className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-full text-sm"
+                      className="px-3 py-1.5 sm:px-4 sm:py-2 bg-white border border-gray-200 text-gray-700 rounded-full text-xs sm:text-sm"
                     >
                       {tag}
                     </span>
@@ -317,7 +319,7 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
       {/* Main Content Section */}
       <motion.section
         ref={letterRef}
-        className="relative py-20 px-8"
+        className="relative py-10 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8"
         initial={{ opacity: 0 }}
         animate={{ opacity: letterInView ? 1 : 0 }}
         transition={{ duration: 0.8 }}
@@ -325,11 +327,13 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_200px] gap-12">
             {/* Essay Content */}
-            <div className="max-w-3xl mx-auto">
-              <JsonContentRenderer
-                sections={essay.contentJson.sections}
-                inView={letterInView}
-              />
+            <div className="max-w-3xl mx-auto w-full">
+              {essay.contentJson && (
+                <JsonContentRenderer
+                  sections={essay.contentJson.sections}
+                  inView={letterInView}
+                />
+              )}
             </div>
 
             {/* Side Navigation - only show if there are multiple sections */}
