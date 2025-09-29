@@ -6,6 +6,19 @@ import { db } from '@/lib/instant';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 
+interface Essay {
+  id: string;
+  title?: string;
+  slug?: string;
+  excerpt?: string;
+  tags?: string[];
+  published?: boolean;
+  featured?: boolean;
+  publishedAt?: number;
+  createdAt?: number;
+  updatedAt?: number;
+}
+
 export default function EssaysPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -58,7 +71,7 @@ export default function EssaysPage() {
     return filtered;
   }, [essays, searchTerm, filterStatus, sortBy]);
 
-  const handleToggleFeatured = async (essay: any) => {
+  const handleToggleFeatured = async (essay: Essay) => {
     try {
       await db.transact(
         db.tx.essays[essay.id].update({
@@ -71,7 +84,7 @@ export default function EssaysPage() {
     }
   };
 
-  const handleTogglePublished = async (essay: any) => {
+  const handleTogglePublished = async (essay: Essay) => {
     try {
       await db.transact(
         db.tx.essays[essay.id].update({

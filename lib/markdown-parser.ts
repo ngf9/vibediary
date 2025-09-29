@@ -1,6 +1,3 @@
-import { remark } from 'remark';
-import remarkGfm from 'remark-gfm';
-
 export interface ContentSection {
   id: string;
   type: 'heading' | 'paragraph' | 'list' | 'image' | 'code' | 'blockquote' | 'separator';

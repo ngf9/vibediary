@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: PageProps) {
 
   return {
     title: `${essay.title} | Diary of a Vibe Coder`,
-    description: essay.excerpt || essay.description || 'Read this essay on Diary of a Vibe Coder',
+    description: essay.excerpt || 'Read this essay on Diary of a Vibe Coder',
   };
 }
 
@@ -48,8 +48,16 @@ export default async function EssayPage({ params }: PageProps) {
   // Pass data to client component
   return (
     <EssayClient
-      essay={essay}
-      allEssays={allEssays}
+      essay={{
+        ...essay,
+        editorMode: essay.editorMode as 'simple' | 'advanced' | undefined,
+        publishedAt: essay.publishedAt ? new Date(essay.publishedAt).toISOString() : undefined
+      }}
+      allEssays={allEssays.map(e => ({
+        ...e,
+        editorMode: e.editorMode as 'simple' | 'advanced' | undefined,
+        publishedAt: e.publishedAt ? new Date(e.publishedAt).toISOString() : undefined
+      }))}
     />
   );
 }

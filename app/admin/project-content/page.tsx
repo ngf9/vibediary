@@ -43,29 +43,41 @@ export default function ProjectContentPage() {
   // Fetch project content for selected project
   const { data: contentData } = db.useQuery(
     selectedProjectId ? {
-      projectContent: {
-        $: {
-          where: { projectId: selectedProjectId }
-        }
-      }
+      projectContent: {}
     } : {}
   );
 
   // Set initial values when content loads
   useEffect(() => {
-    if (contentData?.projectContent?.[0]) {
-      const content = contentData.projectContent[0];
-      setOverview(content.overview || '');
-      setChallenges(content.challenges || []);
-      setSolutions(content.solutions || []);
-      setLearnings(content.learnings || []);
-      setTechDetails(content.techDetails || {
-        architecture: '',
-        stack: '',
-        deployment: '',
-        performance: ''
-      });
-      setGallery(content.gallery || []);
+    if (contentData?.projectContent && selectedProjectId) {
+      // Find content for the selected project
+      const content = contentData.projectContent.find((c: any) => c.projectId === selectedProjectId);
+      if (content) {
+        setOverview(content.overview || '');
+        setChallenges(content.challenges || []);
+        setSolutions(content.solutions || []);
+        setLearnings(content.learnings || []);
+        setTechDetails(content.techDetails || {
+          architecture: '',
+          stack: '',
+          deployment: '',
+          performance: ''
+        });
+        setGallery(content.gallery || []);
+      } else {
+        // Reset fields when switching to a project without content
+        setOverview('');
+        setChallenges([]);
+        setSolutions([]);
+        setLearnings([]);
+        setTechDetails({
+          architecture: '',
+          stack: '',
+          deployment: '',
+          performance: ''
+        });
+        setGallery([]);
+      }
     } else if (selectedProjectId) {
       // Reset fields when switching to a project without content
       setOverview('');

@@ -49,13 +49,13 @@ export default function EditEssayPage() {
           where: { slug: slug }
         }
       }
-    } : {}
+    } : {} as any
   );
 
   // Set initial values when data loads
   useEffect(() => {
-    if (!isNew && essayData?.essays?.[0]) {
-      const essay = essayData.essays[0];
+    if (!isNew && (essayData as any)?.essays?.[0]) {
+      const essay = (essayData as any).essays[0];
       setTitle(essay.title || '');
       setSubtitle(essay.subtitle || '');
       setEssaySlug(essay.slug || '');
@@ -140,7 +140,7 @@ export default function EditEssayPage() {
         setTimeout(() => router.push('/admin/essays'), 1500);
       } else {
         // Update existing essay
-        const essay = essayData?.essays?.[0];
+        const essay = (essayData as any)?.essays?.[0];
         if (essay) {
           const wasPublished = essay.published;
           await db.transact(

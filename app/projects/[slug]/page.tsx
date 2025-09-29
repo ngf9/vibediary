@@ -9,8 +9,13 @@ export async function generateStaticParams() {
   }));
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const project = await getProjectBySlug(params.slug);
+interface PageProps {
+  params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps) {
+  const resolvedParams = await params;
+  const project = await getProjectBySlug(resolvedParams.slug);
 
   if (!project) {
     return {
@@ -24,9 +29,10 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default async function ProjectPage({ params }: { params: { slug: string } }) {
-  const project = await getProjectBySlug(params.slug);
-  const content = await getProjectContent(params.slug);
+export default async function ProjectPage({ params }: PageProps) {
+  const resolvedParams = await params;
+  const project = await getProjectBySlug(resolvedParams.slug);
+  const content = await getProjectContent(resolvedParams.slug);
 
   if (!project) {
     notFound();

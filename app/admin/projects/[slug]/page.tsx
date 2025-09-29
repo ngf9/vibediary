@@ -35,33 +35,31 @@ export default function EditProjectPage() {
   // Fetch existing project if editing
   const { data: projectData } = db.useQuery(
     !isNew ? {
-      projects: {
-        $: {
-          where: { slug: slug }
-        }
-      }
+      projects: {}
     } : {}
   );
 
   // Set initial values when data loads
   useEffect(() => {
-    if (!isNew && projectData?.projects?.[0]) {
-      const project = projectData.projects[0];
-      setTitle(project.title || '');
-      setSubtitle(project.subtitle || '');
-      setProjectSlug(project.slug || '');
-      setDescription(project.description || '');
-      setThumbnail(project.thumbnail || '');
-      setCoverImage(project.coverImage || '');
-      setTechnologies(project.technologies || []);
-      setGithubUrl(project.githubUrl || '');
-      setLiveUrl(project.liveUrl || '');
-      setProjectStatus(project.status || 'planned');
-      setFeatured(project.featured || false);
-      setSortOrder(project.sortOrder || 0);
-      setColor(project.color || '');
+    if (!isNew && projectData?.projects) {
+      const project = projectData.projects.find((p: any) => p.slug === slug);
+      if (project) {
+        setTitle(project.title || '');
+        setSubtitle(project.subtitle || '');
+        setProjectSlug(project.slug || '');
+        setDescription(project.description || '');
+        setThumbnail(project.thumbnail || '');
+        setCoverImage(project.coverImage || '');
+        setTechnologies(project.technologies || []);
+        setGithubUrl(project.githubUrl || '');
+        setLiveUrl(project.liveUrl || '');
+        setProjectStatus(project.status || 'planned');
+        setFeatured(project.featured || false);
+        setSortOrder(project.sortOrder || 0);
+        setColor(project.color || '');
+      }
     }
-  }, [isNew, projectData]);
+  }, [isNew, projectData, slug]);
 
   const handleAddTech = () => {
     if (newTech.trim()) {
@@ -105,7 +103,7 @@ export default function EditProjectPage() {
         setTimeout(() => router.push('/admin/projects'), 1500);
       } else {
         // Update existing project
-        const project = projectData?.projects?.[0];
+        const project = projectData?.projects?.find((p: any) => p.slug === slug);
         if (project) {
           await db.transact(
             db.tx.projects[project.id].update({

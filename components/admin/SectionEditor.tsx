@@ -421,7 +421,7 @@ export default function SectionEditor({ sections, onSectionsChange }: SectionEdi
                   </button>
                   <button
                     onClick={() => {
-                      const newContent = [...section.content, { type: 'image', src: '', alt: '', caption: '', alignment: 'center' }];
+                      const newContent = [...section.content, { type: 'image', src: '', alt: '', caption: '', alignment: 'center' as const }];
                       updateSectionContent(index, newContent);
                     }}
                     className="text-sm text-blue-600 hover:text-blue-800"

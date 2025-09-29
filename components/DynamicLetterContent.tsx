@@ -136,13 +136,13 @@ export default function DynamicLetterContent({ letterContent, letterInView }: Dy
             img: ({ src, alt }) => (
               <span className="block my-6">
                 <Image
-                  src={src || ''}
+                  src={(typeof src === 'string' ? src : '') || ''}
                   alt={alt || ''}
                   width={800}
                   height={600}
                   className="w-full h-auto rounded-lg shadow-lg"
                   style={{ objectFit: 'cover' }}
-                  unoptimized={src?.startsWith('data:')}
+                  unoptimized={typeof src === 'string' && src.startsWith('data:')}
                 />
               </span>
             ),

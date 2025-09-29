@@ -14,6 +14,20 @@ const SimpleMarkdownEditor = dynamic(
   { ssr: false, loading: () => <div className="h-64 bg-gray-50 rounded-lg animate-pulse" /> }
 );
 
+interface JourneyItem {
+  id?: string;
+  title: string;
+  date: string;
+  description: string;
+}
+
+interface AboutSection {
+  id?: string;
+  title?: string;
+  content?: string;
+  type?: string;
+}
+
 export default function AdminAboutPage() {
   const [activeTab, setActiveTab] = useState<'bio' | 'journey' | 'skills' | 'contact'>('bio');
   const [status, setStatus] = useState('');
@@ -65,7 +79,7 @@ export default function AdminAboutPage() {
       setTimelineImage(content.timelineImage || '');
 
       // Ensure journey items have IDs
-      const journeyWithIds = (content.journey || []).map((item: any, index: number) => ({
+      const journeyWithIds = (content.journey || []).map((item: JourneyItem, index: number) => ({
         ...item,
         id: item.id || `journey-${Date.now()}-${index}`
       }));
@@ -192,7 +206,7 @@ export default function AdminAboutPage() {
             ].map((tab) => (
               <button
                 key={tab.key}
-                onClick={() => setActiveTab(tab.key as any)}
+                onClick={() => setActiveTab(tab.key as 'bio' | 'journey' | 'skills' | 'contact')}
                 className={`
                   flex-1 py-4 px-6 text-center font-medium text-sm transition-all duration-200
                   ${activeTab === tab.key
@@ -346,7 +360,7 @@ You can use **bold**, *italic*, lists, and more!"
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {journey.map((item, index) => (
+                    {journey.map((item) => (
                       <div key={item.id} className="bg-gray-50 rounded-lg p-6 relative">
                         <button
                           onClick={() => removeJourneyItem(item.id)}
