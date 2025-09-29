@@ -84,14 +84,14 @@ function EmailStep({ onSendEmail }: { onSendEmail: (email: string) => void }) {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl hover:ring-2 hover:ring-purple-500/20 hover:ring-offset-2 transform active:scale-[0.98]"
+          className="w-full py-4 px-8 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform active:scale-[0.98]"
         >
           {isLoading ? 'Sending...' : 'Send Verification Code'}
         </button>
 
         <Link
           href="/"
-          className="block w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl hover:ring-2 hover:ring-purple-500/20 hover:ring-offset-2 transform active:scale-[0.98] text-center"
+          className="block w-full py-4 px-8 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform active:scale-[0.98] text-center"
         >
           Back to Home
         </Link>
@@ -164,7 +164,7 @@ function CodeStep({ sentEmail }: { sentEmail: string }) {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl hover:ring-2 hover:ring-purple-500/20 hover:ring-offset-2 transform active:scale-[0.98]"
+          className="w-full py-4 px-8 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform active:scale-[0.98]"
         >
           {isLoading ? 'Verifying...' : 'Verify Code'}
         </button>
@@ -172,7 +172,7 @@ function CodeStep({ sentEmail }: { sentEmail: string }) {
         <button
           type="button"
           onClick={() => window.location.reload()}
-          className="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl hover:ring-2 hover:ring-purple-500/20 hover:ring-offset-2 transform active:scale-[0.98]"
+          className="w-full py-4 px-8 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform active:scale-[0.98]"
         >
           Use a different email
         </button>
