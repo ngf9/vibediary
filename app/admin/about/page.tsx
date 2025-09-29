@@ -4,6 +4,15 @@ import React, { useState, useEffect } from 'react';
 import { db } from '@/lib/instant';
 import { id } from '@instantdb/react';
 import { motion } from 'framer-motion';
+import dynamic from 'next/dynamic';
+import Image from 'next/image';
+import { parseMarkdownToJson } from '@/lib/markdown-parser';
+
+// Dynamically import SimpleMarkdownEditor to avoid SSR issues
+const SimpleMarkdownEditor = dynamic(
+  () => import('@/components/admin/SimpleMarkdownEditor'),
+  { ssr: false, loading: () => <div className="h-64 bg-gray-50 rounded-lg animate-pulse" /> }
+);
 
 export default function AdminAboutPage() {
   const [activeTab, setActiveTab] = useState<'bio' | 'journey' | 'skills' | 'contact'>('bio');
@@ -13,6 +22,8 @@ export default function AdminAboutPage() {
   // Bio fields
   const [bio, setBio] = useState('');
   const [currentFocus, setCurrentFocus] = useState('');
+  const [profileImage, setProfileImage] = useState('');
+  const [timelineImage, setTimelineImage] = useState('');
 
   // Journey fields (milestones)
   const [journey, setJourney] = useState<Array<{
@@ -50,6 +61,8 @@ export default function AdminAboutPage() {
       const content = aboutData.aboutContent[0];
       setBio(content.bio || '');
       setCurrentFocus(content.currentFocus || '');
+      setProfileImage(content.profileImage || '');
+      setTimelineImage(content.timelineImage || '');
 
       // Ensure journey items have IDs
       const journeyWithIds = (content.journey || []).map((item: any, index: number) => ({
@@ -108,12 +121,20 @@ export default function AdminAboutPage() {
       setIsUpdating(true);
       setStatus('Updating about page...');
 
+      // Parse markdown to JSON
+      const bioJson = await parseMarkdownToJson(bio);
+      const focusJson = currentFocus ? await parseMarkdownToJson(currentFocus) : null;
+
       const aboutRecord = aboutData?.aboutContent?.[0];
       if (aboutRecord) {
         await db.transact(
           db.tx.aboutContent[aboutRecord.id].update({
             bio,
+            bioJson,
             currentFocus: currentFocus || null,
+            currentFocusJson: focusJson,
+            profileImage: profileImage || null,
+            timelineImage: timelineImage || null,
             journey: journey.filter(item => item.title && item.date),
             skills,
             contact,
@@ -126,7 +147,11 @@ export default function AdminAboutPage() {
           db.tx.aboutContent[id()].update({
             pageId: 'about',
             bio,
+            bioJson,
             currentFocus: currentFocus || null,
+            currentFocusJson: focusJson,
+            profileImage: profileImage || null,
+            timelineImage: timelineImage || null,
             journey: journey.filter(item => item.title && item.date),
             skills,
             contact,
@@ -194,16 +219,52 @@ export default function AdminAboutPage() {
             {/* Bio Tab */}
             {activeTab === 'bio' && (
               <div className="space-y-6">
+                {/* Profile Image */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Profile Image
+                  </label>
+                  <div className="space-y-3">
+                    <input
+                      type="text"
+                      value={profileImage}
+                      onChange={(e) => setProfileImage(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      placeholder="Image URL (e.g., /profile.jpg or https://...)"
+                    />
+                    {profileImage && (
+                      <div className="flex items-center gap-4">
+                        <div className="relative w-32 h-32">
+                          <Image
+                            src={profileImage}
+                            alt="Profile preview"
+                            fill
+                            className="rounded-lg object-cover border border-gray-200"
+                            unoptimized={profileImage.startsWith('data:')}
+                          />
+                        </div>
+                        <p className="text-sm text-gray-500">
+                          Preview of your profile image
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Bio <span className="text-red-500">*</span>
                   </label>
-                  <textarea
+                  <p className="text-xs text-gray-500 mb-3">
+                    Write your bio using Markdown for rich formatting
+                  </p>
+                  <SimpleMarkdownEditor
                     value={bio}
-                    onChange={(e) => setBio(e.target.value)}
-                    rows={8}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="Tell your story... Who are you? What drives you?"
+                    onChange={setBio}
+                    placeholder="Tell your story... Who are you? What drives you?
+
+You can use **bold**, *italic*, lists, and more!"
+                    height={300}
                   />
                   <p className="mt-2 text-xs text-gray-500">
                     This is the main bio text that appears on your about page
@@ -214,12 +275,18 @@ export default function AdminAboutPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Current Focus
                   </label>
-                  <textarea
+                  <p className="text-xs text-gray-500 mb-3">
+                    What are you currently working on or excited about?
+                  </p>
+                  <SimpleMarkdownEditor
                     value={currentFocus}
-                    onChange={(e) => setCurrentFocus(e.target.value)}
-                    rows={3}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="What are you currently working on or excited about?"
+                    onChange={setCurrentFocus}
+                    placeholder="Share what you're currently working on...
+
+- Building something cool?
+- Learning new skills?
+- Exploring new technologies?"
+                    height={200}
                   />
                 </div>
               </div>
@@ -228,6 +295,41 @@ export default function AdminAboutPage() {
             {/* Journey Tab */}
             {activeTab === 'journey' && (
               <div className="space-y-6">
+                {/* Timeline Image */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Timeline Section Image
+                  </label>
+                  <div className="space-y-3">
+                    <input
+                      type="text"
+                      value={timelineImage}
+                      onChange={(e) => setTimelineImage(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      placeholder="Image URL (e.g., /artofconversation.png or https://...)"
+                    />
+                    {timelineImage && (
+                      <div className="flex items-center gap-4">
+                        <div className="relative w-48 h-32">
+                          <Image
+                            src={timelineImage}
+                            alt="Timeline preview"
+                            fill
+                            className="rounded-lg object-cover border border-gray-200"
+                            unoptimized={timelineImage.startsWith('data:')}
+                          />
+                        </div>
+                        <p className="text-sm text-gray-500">
+                          Preview of your timeline image
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  <p className="mt-2 text-xs text-gray-500">
+                    This image appears next to your journey timeline on the about page
+                  </p>
+                </div>
+
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-semibold text-gray-900">Journey Milestones</h3>
                   <button
@@ -444,7 +546,7 @@ export default function AdminAboutPage() {
         <button
           onClick={saveChanges}
           disabled={isUpdating}
-          className="px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl hover:ring-2 hover:ring-purple-500/20 hover:ring-offset-2 transform active:scale-[0.98]"
+          className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform active:scale-[0.98]"
         >
           {isUpdating ? 'Saving...' : 'Save Changes'}
         </button>

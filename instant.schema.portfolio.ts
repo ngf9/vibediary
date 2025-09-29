@@ -65,9 +65,13 @@ const _schema = i.schema({
     aboutContent: i.entity({
       pageId: i.string().indexed().unique(), // Should be 'about'
       bio: i.string(),
+      bioJson: i.any().optional(), // Parsed bio JSON structure
+      profileImage: i.string().optional(), // Profile/avatar image URL
+      timelineImage: i.string().optional(), // Timeline section image URL
       journey: i.any().optional(), // JSON array of milestones
       skills: i.any().optional(), // JSON array of skills/tools
       currentFocus: i.string().optional(),
+      currentFocusJson: i.any().optional(), // Parsed focus JSON structure
       contact: i.any().optional(), // JSON object with contact info
       isActive: i.boolean(),
       createdAt: i.number(),

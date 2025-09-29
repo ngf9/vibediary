@@ -154,33 +154,30 @@ export default function LetterSectionNav({
                         <button
                           onClick={() => onSectionClick(section.id)}
                           className={cn(
-                            "group flex items-center gap-3 transition-all duration-300 -ml-1 pl-1 pr-4 py-1 rounded-lg",
-                            currentSection === section.id 
-                              ? "bg-blue/10 backdrop-blur-sm" 
-                              : "hover:bg-white/40 hover:backdrop-blur-sm"
+                            "group flex items-center gap-3 transition-all duration-150 -ml-1 pl-2 pr-4 py-2 rounded-lg w-full",
+                            currentSection === section.id
+                              ? "bg-gradient-to-r from-purple-50 to-blue-50"
+                              : "hover:bg-gray-50"
                           )}
                         >
-                          {/* Dot */}
-                          <div className="relative">
-                            <div 
-                              className={cn(
-                                "rounded-full transition-all duration-300",
-                                currentSection === section.id
-                                  ? "w-3 h-3 bg-blue"
-                                  : "w-2 h-2 bg-gray-300 group-hover:bg-gray-500"
-                              )}
-                            />
-                            {currentSection === section.id && (
-                              <div className="absolute inset-0 w-3 h-3 rounded-full bg-blue animate-ping" />
+                          {/* Dot with pulsing effect */}
+                          <div className="relative flex-shrink-0 flex items-center justify-center w-4 h-4">
+                            {currentSection === section.id ? (
+                              <>
+                                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 animate-pulse" />
+                                <div className="relative w-2.5 h-2.5 rounded-full bg-gradient-to-r from-purple-600 to-blue-600" />
+                              </>
+                            ) : (
+                              <div className="w-2 h-2 rounded-full bg-gray-400 group-hover:bg-gray-600 transition-all duration-150" />
                             )}
                           </div>
                           
-                          {/* Label */}
+                          {/* Label with clear active state */}
                           <span
                             className={cn(
-                              "text-sm whitespace-nowrap truncate max-w-[180px] transition-all duration-300",
+                              "text-sm whitespace-nowrap truncate max-w-[180px] transition-all duration-150",
                               currentSection === section.id
-                                ? "text-gray-900 font-semibold"
+                                ? "text-gray-900 font-bold"
                                 : "text-gray-600 group-hover:text-gray-800"
                             )}
                             title={section.navLabel}
@@ -199,10 +196,10 @@ export default function LetterSectionNav({
 
       {/* Mobile Navigation - Horizontal Scrollable Tabs */}
       <motion.nav
-        className="lg:hidden fixed top-16 left-0 right-0 z-40 bg-white/95 backdrop-blur-sm shadow-sm h-10"
+        className="lg:hidden fixed top-16 left-0 right-0 z-40 bg-white/95 backdrop-blur-sm shadow-md h-12 border-b border-gray-100"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.3 }}
       >
         {/* Gradient Fade Left */}
         <div
@@ -232,33 +229,34 @@ export default function LetterSectionNav({
               data-section={section.id}
               onClick={() => onSectionClick(section.id)}
               className={cn(
-                "relative px-4 h-full flex items-center whitespace-nowrap transition-all duration-300",
-                "[scroll-snap-align:center]",
-                index === 0 && "ml-2",
-                index === sections.length - 1 && "mr-2"
+                "relative px-4 h-full flex items-center whitespace-nowrap transition-all duration-200",
+                "[scroll-snap-align:center] active:scale-95",
+                currentSection === section.id && "px-5",
+                index === 0 && "ml-4",
+                index === sections.length - 1 && "mr-4"
               )}
             >
               {/* Tab Label */}
               <span
                 className={cn(
-                  "text-sm font-medium transition-colors duration-300",
+                  "text-sm font-medium transition-all duration-200",
                   currentSection === section.id
-                    ? "text-gray-900"
-                    : "text-gray-500 hover:text-gray-700"
+                    ? "text-gray-900 font-semibold"
+                    : "text-gray-600 active:text-gray-800"
                 )}
               >
                 {section.navLabel}
               </span>
 
-              {/* Active Dot Indicator */}
+              {/* Active Bar Indicator */}
               {currentSection === section.id && (
                 <motion.div
-                  className="absolute bottom-1 left-1/2 transform -translate-x-1/2"
+                  className="absolute bottom-0 left-0 right-0 h-0.5"
                   layoutId="mobile-active-indicator"
                   initial={false}
                   transition={{ type: "spring", stiffness: 380, damping: 30 }}
                 >
-                  <div className="w-1 h-1 bg-blue rounded-full" />
+                  <div className="h-full bg-gradient-to-r from-purple-500 to-blue-500" />
                 </motion.div>
               )}
             </button>

@@ -22,6 +22,7 @@ interface AboutPageClientProps {
     description: string;
   }>;
   essays?: Essay[];
+  timelineImage?: string;
 }
 
 export default function AboutPageClient({
@@ -29,6 +30,7 @@ export default function AboutPageClient({
     "I believe that AI education should be accessible, practical, and transformative. My approach breaks down complex concepts into intuitive understanding, then builds them back up through hands-on experience.",
     "I'm not just teaching tools—I'm cultivating a mindset. I want you to think like a builder, understand like an engineer, and create with the confidence of someone who truly grasps the technology you're wielding."
   ],
+  timelineImage = "/artofconversation.png",
   milestones = [
     {
       id: '1',
@@ -93,7 +95,7 @@ export default function AboutPageClient({
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
           <h1 className="text-6xl lg:text-7xl font-bold text-gray-900">
-            About <span className="text-blue">Me</span>
+            About Me
           </h1>
         </motion.div>
 
@@ -231,8 +233,8 @@ export default function AboutPageClient({
                 >
                   <div className="relative h-[600px] rounded-3xl overflow-hidden shadow-lg">
                     <Image
-                      src="/TeamPic.png"
-                      alt="The AI Study Camp Team"
+                      src={timelineImage}
+                      alt="Timeline"
                       fill
                       className="object-cover rounded-3xl"
                       sizes="(max-width: 1024px) 100vw, 500px"

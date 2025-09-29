@@ -162,45 +162,107 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
       }) || [];
   }, [essay.contentJson, letterContent.sections]);
 
-  // Track current section based on scroll
+  // Track current section using IntersectionObserver for better accuracy
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY + window.innerHeight / 3;
+    if (sections.length === 0) return;
 
-      // Get all section elements based on whether we're using JSON or old format
-      const sectionElements = sections.map(section => {
-        // For JSON content, IDs are already correct
-        const elementById = document.getElementById(section.id);
-        return elementById;
-      }).filter(Boolean);
+    let timeoutId: NodeJS.Timeout;
+    const sectionStates = new Map<string, boolean>();
 
-      // Find the current section
-      let current = 'opening';
-      for (let i = sectionElements.length - 1; i >= 0; i--) {
-        const element = sectionElements[i];
-        if (element && element.offsetTop <= scrollPosition) {
-          current = sections[i].id || 'opening';
-          break;
+    const observerOptions = {
+      rootMargin: '-15% 0px -75% 0px', // Adjusted for better detection
+      threshold: [0, 0.5, 1]
+    };
+
+    const updateCurrentSection = () => {
+      // Find the topmost visible section
+      const scrollY = window.scrollY;
+      const viewportHeight = window.innerHeight;
+      let currentId = sections[0]?.id;
+      let minDistance = Infinity;
+
+      // Find section closest to top 25% of viewport
+      for (const section of sections) {
+        const element = document.getElementById(section.id);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          const targetLine = viewportHeight * 0.25; // 25% from top
+          const distance = Math.abs(rect.top - targetLine);
+
+          // Update if this section is closer to our target line
+          if (distance < minDistance && rect.top < viewportHeight * 0.7) {
+            minDistance = distance;
+            currentId = section.id;
+          }
         }
       }
 
-      setCurrentSection(current);
+      setCurrentSection(currentId);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    handleScroll(); // Initial check
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        sectionStates.set(entry.target.id, entry.isIntersecting);
+      });
 
-    return () => window.removeEventListener('scroll', handleScroll);
+      // Debounce the section update
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(updateCurrentSection, 50);
+    }, observerOptions);
+
+    // Observe all section headings
+    sections.forEach(section => {
+      const element = document.getElementById(section.id);
+      if (element) {
+        observer.observe(element);
+        sectionStates.set(section.id, false);
+      }
+    });
+
+    // Set initial section based on scroll position
+    const checkInitialSection = () => {
+      updateCurrentSection();
+    };
+
+    // Small delay to ensure DOM is ready
+    setTimeout(checkInitialSection, 100);
+
+    // Also update on scroll for immediate feedback
+    const handleScroll = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(updateCurrentSection, 30);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('scroll', handleScroll);
+      sections.forEach(section => {
+        const element = document.getElementById(section.id);
+        if (element) {
+          observer.unobserve(element);
+        }
+      });
+    };
   }, [sections]);
 
   const scrollToSection = useCallback((sectionId: string) => {
-    // Simply use the sectionId directly as it's already the correct format
     const element = document.getElementById(sectionId);
     if (element) {
-      const offset = 100;
+      // Calculate offset based on fixed headers
+      const isMobile = window.innerWidth < 1024;
+      const offset = isMobile ? 130 : 110; // Slightly more offset for better positioning
+
       const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+      const targetPosition = elementPosition - offset;
+
+      // Immediately update current section for instant feedback
+      setCurrentSection(sectionId);
+
+      // Smooth scroll
       window.scrollTo({
-        top: elementPosition - offset,
+        top: targetPosition,
         behavior: 'smooth'
       });
     }

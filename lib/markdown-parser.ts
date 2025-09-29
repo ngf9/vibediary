@@ -40,7 +40,18 @@ export async function parseMarkdownToJson(markdown: string): Promise<ParsedConte
   let wordCount = 0;
   const headings: string[] = [];
 
-  const createId = () => `section-${++sectionId}`;
+  const createId = (text?: string) => {
+    if (text) {
+      // Create slug from text for headings
+      return text
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/(^-|-$)/g, '');
+    }
+    // Default for non-heading sections
+    return `section-${++sectionId}`;
+  };
 
   const flushParagraph = () => {
     if (currentParagraph.length > 0) {
@@ -105,7 +116,7 @@ export async function parseMarkdownToJson(markdown: string): Promise<ParsedConte
       const text = headingMatch[2].trim();
       headings.push(text);
       sections.push({
-        id: createId(),
+        id: createId(text),  // Use text-based ID for headings
         type: 'heading',
         level,
         content: text

@@ -1,17 +1,20 @@
 import AboutPageClient from './client';
-import { getEssays } from '@/lib/instant-server-portfolio';
+import { getEssays, getAboutContent } from '@/lib/instant-server-portfolio';
 
 export default async function AboutPage() {
   // Fetch essays for navigation
   const essays = await getEssays();
 
-  // Static content for the About page
-  const philosophyContent = [
+  // Fetch about content from database
+  const aboutContent = await getAboutContent();
+
+  // Use database content or fallbacks
+  const philosophyContent = aboutContent?.bio ? [aboutContent.bio] : [
     "I'm a vibe coder who builds with AI. What started as curiosity about Claude Code has transformed into a passion for creating meaningful digital experiences.",
     "I believe in the power of AI to amplify human creativity. My approach combines intuitive design with practical functionality, always pushing the boundaries of what's possible when humans and AI collaborate."
   ];
 
-  const milestones = [
+  const milestones = aboutContent?.journey || [
     {
       id: '1',
       title: "The Beginning",
@@ -44,11 +47,14 @@ export default async function AboutPage() {
     }
   ];
 
+  const timelineImage = aboutContent?.timelineImage || "/vibe_image2.png";
+
   return (
     <AboutPageClient
       philosophyContent={philosophyContent}
       milestones={milestones}
       essays={essays}
+      timelineImage={timelineImage}
     />
   );
 }
