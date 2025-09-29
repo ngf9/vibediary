@@ -36,7 +36,8 @@ export default function JsonContentRenderer({ sections, inView = true }: JsonCon
             {section.level === 2 && (
               <h2
                 id={section.id}
-                className="text-xl sm:text-2xl md:text-3xl font-semibold mt-10 sm:mt-12 md:mt-16 mb-3 sm:mb-4 text-gray-900 scroll-mt-[130px] lg:scroll-mt-[110px]"
+                className="text-xl sm:text-2xl md:text-3xl font-semibold text-gray-900 scroll-mt-[130px] lg:scroll-mt-[110px]"
+                style={{ marginTop: '2rem', marginBottom: '2rem' }}
               >
                 {section.content}
               </h2>

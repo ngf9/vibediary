@@ -185,10 +185,10 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
           </motion.div>
 
           {/* Hero Content */}
-          <div className="relative z-10 text-center text-white px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
+          <div className="relative z-10 text-center text-white px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
             {publicationDate && (
               <motion.p
-                className="text-xs sm:text-sm font-medium text-white/90 mb-3 sm:mb-4 tracking-wider uppercase"
+                className="text-sm sm:text-base md:text-lg font-medium text-white/90 mb-4 sm:mb-6 tracking-wider uppercase"
                 initial={{ opacity: 0, y: 30 }}
                 animate={heroInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
                 transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
@@ -198,7 +198,7 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
             )}
 
             <motion.h1
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-6"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold mb-6 sm:mb-8 leading-tight"
               initial={{ opacity: 0, y: 30 }}
               animate={heroInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
               transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
@@ -208,7 +208,7 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
 
             {heroSubtitle && (
               <motion.p
-                className="text-base sm:text-lg md:text-xl lg:text-2xl mb-6 sm:mb-8 font-light leading-relaxed"
+                className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl mb-8 sm:mb-10 font-light leading-relaxed"
                 initial={{ opacity: 0, y: 30 }}
                 animate={heroInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
                 transition={{ duration: 0.8, delay: 0.7, ease: "easeOut" }}
@@ -219,7 +219,7 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
 
             {essay.tags && essay.tags.length > 0 && (
               <motion.div
-                className="flex flex-wrap gap-2 justify-center"
+                className="flex flex-wrap gap-3 justify-center"
                 initial={{ opacity: 0, y: 30 }}
                 animate={heroInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
                 transition={{ duration: 0.8, delay: 0.9, ease: "easeOut" }}
@@ -227,7 +227,7 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
                 {essay.tags.map((tag, index) => (
                   <span
                     key={index}
-                    className="px-3 py-1.5 sm:px-4 sm:py-2 bg-white/20 backdrop-blur-sm text-white rounded-full text-xs sm:text-sm"
+                    className="px-4 py-2 sm:px-5 sm:py-2.5 md:px-6 md:py-3 bg-white/20 backdrop-blur-sm text-white rounded-full text-sm sm:text-base md:text-lg font-medium"
                   >
                     {tag}
                   </span>

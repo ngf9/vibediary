@@ -1028,7 +1028,7 @@ body.bw-mode .bg-purple-400.opacity-30 {
 }
 
 .prose h2 {
-  margin-top: 3rem;
+  margin-top: 6rem !important;
   margin-bottom: 1rem;
 }
 
