@@ -7,10 +7,11 @@ import { db } from '@/lib/instant';
 import { id } from '@instantdb/react';
 import { motion } from 'framer-motion';
 import dynamic from 'next/dynamic';
+import { parseMarkdownToJson } from '@/lib/markdown-parser';
 
-// Dynamically import MarkdownEditor to avoid SSR issues
-const MarkdownEditor = dynamic(
-  () => import('@/components/admin/MarkdownEditor'),
+// Dynamically import SimpleMarkdownEditor to avoid SSR issues
+const SimpleMarkdownEditor = dynamic(
+  () => import('@/components/admin/SimpleMarkdownEditor'),
   { ssr: false, loading: () => <div className="h-96 bg-gray-50 rounded-lg animate-pulse" /> }
 );
 
@@ -108,6 +109,9 @@ export default function EditEssayPage() {
     try {
       const now = Date.now();
 
+      // Parse markdown to JSON structure
+      const parsedContent = await parseMarkdownToJson(content);
+
       if (isNew) {
         // Create new essay
         await db.transact(
@@ -116,7 +120,8 @@ export default function EditEssayPage() {
             title,
             subtitle: subtitle || null,
             excerpt,
-            content,
+            content, // Keep raw markdown for editing
+            contentJson: parsedContent, // Add parsed JSON structure
             thumbnail: thumbnail || null,
             heroImage: heroImage || null,
             heroTitle: heroTitle || null,
@@ -144,7 +149,8 @@ export default function EditEssayPage() {
               title,
               subtitle: subtitle || null,
               excerpt,
-              content,
+              content, // Keep raw markdown for editing
+              contentJson: parsedContent, // Add parsed JSON structure
               thumbnail: thumbnail || null,
               heroImage: heroImage || null,
               heroTitle: heroTitle || null,
@@ -293,7 +299,7 @@ export default function EditEssayPage() {
                       Write your essay using Markdown. You can format text with **bold**, *italic*, create lists, add images, and more.
                     </p>
                   </div>
-                  <MarkdownEditor
+                  <SimpleMarkdownEditor
                     value={content}
                     onChange={setContent}
                     placeholder="Start writing your essay in markdown...

@@ -97,7 +97,7 @@ export default function DynamicLetterContent({ letterContent, letterInView }: Dy
             h2: ({ children }) => {
               const text = String(children);
               const id = text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-              return <h2 id={`section-${id}`} className="text-3xl font-semibold mt-6 mb-3 text-gray-900 scroll-mt-32">{children}</h2>;
+              return <h2 id={`section-${id}`} className="text-3xl font-semibold mt-16 mb-4 text-gray-900 scroll-mt-32">{children}</h2>;
             },
             h3: ({ children }) => {
               const text = String(children);
@@ -105,9 +105,9 @@ export default function DynamicLetterContent({ letterContent, letterInView }: Dy
               return <h3 id={`section-${id}`} className="text-2xl font-semibold mt-5 mb-2 text-gray-900 scroll-mt-32">{children}</h3>;
             },
             h4: ({ children }) => <h4 className="text-xl font-medium mt-4 mb-2 text-gray-800">{children}</h4>,
-            p: ({ children }) => <p className="text-base leading-relaxed text-gray-700 mb-4">{children}</p>,
-            ul: ({ children }) => <ul className="space-y-2 mb-6 text-gray-700">{children}</ul>,
-            ol: ({ children }) => <ol className="space-y-2 mb-6 text-gray-700 list-decimal list-inside">{children}</ol>,
+            p: ({ children }) => <p className="text-base leading-relaxed text-gray-700 mb-6">{children}</p>,
+            ul: ({ children }) => <ul className="space-y-2 mb-8 text-gray-700">{children}</ul>,
+            ol: ({ children }) => <ol className="space-y-2 mb-8 text-gray-700 list-decimal list-inside">{children}</ol>,
             li: ({ children }) => <li className="leading-relaxed">{children}</li>,
             blockquote: ({ children }) => (
               <blockquote className="border-l-4 border-purple-500 pl-4 py-2 my-6 italic text-gray-600">
@@ -153,7 +153,7 @@ export default function DynamicLetterContent({ letterContent, letterInView }: Dy
             ),
             strong: ({ children }) => <strong className="font-semibold text-gray-900">{children}</strong>,
             em: ({ children }) => <em className="italic">{children}</em>,
-            hr: () => <hr className="my-8 border-gray-300" />,
+            hr: () => <hr className="my-4 border-gray-300" />,
             table: ({ children }) => (
               <table className="w-full my-4 border-collapse">
                 {children}

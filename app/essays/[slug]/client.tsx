@@ -8,6 +8,8 @@ import { motion, useScroll, useInView } from 'motion/react';
 import { useRef } from 'react';
 import DynamicLetterContent from '@/components/DynamicLetterContent';
 import LetterSectionNav from '@/components/LetterSectionNav';
+import JsonContentRenderer from '@/components/JsonContentRenderer';
+import { ContentSection } from '@/lib/markdown-parser';
 
 interface Essay {
   id: string;
@@ -16,7 +18,11 @@ interface Essay {
   subtitle?: string;
   excerpt?: string;
   content?: string;
-  sections?: any[]; // Structured content sections
+  contentJson?: {
+    sections: ContentSection[];
+    metadata?: any;
+  };
+  sections?: any[]; // Legacy: Structured content sections
   editorMode?: 'simple' | 'advanced';
   heroTitle?: string;
   heroSubtitle?: string;
@@ -130,6 +136,17 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
 
   // Extract sections for navigation
   const sections = useMemo(() => {
+    // If we have JSON content, extract navigation from H2 headings
+    if (essay.contentJson) {
+      return essay.contentJson.sections
+        .filter(section => section.type === 'heading' && section.level === 2)
+        .map(section => ({
+          id: section.id,
+          navLabel: section.content || 'Section'
+        }));
+    }
+
+    // Fall back to old navigation extraction
     return letterContent.sections
       ?.filter(section => 'id' in section)
       .map((section, index) => {
@@ -143,28 +160,26 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
           navLabel: label
         };
       }) || [];
-  }, [letterContent.sections]);
+  }, [essay.contentJson, letterContent.sections]);
 
   // Track current section based on scroll
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY + window.innerHeight / 3;
 
-      // Get all section elements - look for the correct ID format
-      const sectionElements = letterContent.sections?.map(section => {
-        // Try multiple ID formats to find the element
-        const elementById = document.getElementById(`section-${section.id}`) ||
-                           document.getElementById(section.id) ||
-                           document.getElementById(`section-${sections.findIndex(s => s.id === section.id)}`);
+      // Get all section elements based on whether we're using JSON or old format
+      const sectionElements = sections.map(section => {
+        // For JSON content, IDs are already correct
+        const elementById = document.getElementById(section.id);
         return elementById;
-      }).filter(Boolean) || [];
+      }).filter(Boolean);
 
       // Find the current section
       let current = 'opening';
       for (let i = sectionElements.length - 1; i >= 0; i--) {
         const element = sectionElements[i];
         if (element && element.offsetTop <= scrollPosition) {
-          current = letterContent.sections?.[i].id || 'opening';
+          current = sections[i].id || 'opening';
           break;
         }
       }
@@ -176,12 +191,11 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
     handleScroll(); // Initial check
 
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [letterContent.sections, sections]);
+  }, [sections]);
 
   const scrollToSection = useCallback((sectionId: string) => {
-    // Try multiple ID formats to find the element
-    const element = document.getElementById(`section-${sectionId}`) ||
-                   document.getElementById(sectionId);
+    // Simply use the sectionId directly as it's already the correct format
+    const element = document.getElementById(sectionId);
     if (element) {
       const offset = 100;
       const elementPosition = element.getBoundingClientRect().top + window.scrollY;
@@ -369,11 +383,28 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
         animate={{ opacity: letterInView ? 1 : 0 }}
         transition={{ duration: 0.8 }}
       >
-        <div className="max-w-4xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-12">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_200px] gap-12">
+            {/* Letter Content */}
+            <div className="max-w-3xl mx-auto">
+
+              {/* Use JSON renderer if contentJson is available, otherwise fall back to old renderer */}
+              {essay.contentJson ? (
+                <JsonContentRenderer
+                  sections={essay.contentJson.sections}
+                  inView={letterInView}
+                />
+              ) : (
+                <DynamicLetterContent
+                  letterContent={letterContent}
+                  letterInView={letterInView}
+                />
+              )}
+            </div>
+
             {/* Side Navigation - only show if there are multiple sections */}
             {sections.length > 1 && (
-              <div className="hidden lg:block">
+              <div className="hidden lg:block sticky top-32 h-fit">
                 <LetterSectionNav
                   sections={sections}
                   currentSection={currentSection}
@@ -381,14 +412,6 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
                 />
               </div>
             )}
-
-            {/* Letter Content */}
-            <div className={sections.length > 1 ? '' : 'lg:col-span-2'}>
-              <DynamicLetterContent
-                letterContent={letterContent}
-                letterInView={letterInView}
-              />
-            </div>
           </div>
         </div>
       </motion.section>
