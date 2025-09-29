@@ -52,6 +52,9 @@ function EmailStep({ onSendEmail }: { onSendEmail: (email: string) => void }) {
     >
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="text-center">
+          <div className="flex justify-center mb-4">
+            <img src="/favicon.ico" alt="Logo" className="w-16 h-16" />
+          </div>
           <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2">Portfolio Admin</h2>
           <p className="text-gray-600 font-light">Enter your email to receive a verification code</p>
         </div>
@@ -69,7 +72,7 @@ function EmailStep({ onSendEmail }: { onSendEmail: (email: string) => void }) {
           <input
             id="email"
             type="email"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-purple-500/20 focus:border-transparent transition-all duration-200"
+            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-purple-500/20 focus:border-transparent transition-all duration-200 text-gray-900"
             placeholder="admin@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -88,7 +91,7 @@ function EmailStep({ onSendEmail }: { onSendEmail: (email: string) => void }) {
 
         <Link
           href="/"
-          className="block text-center text-sm text-gray-600 hover:text-gray-800 transition-colors"
+          className="block w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl hover:ring-2 hover:ring-purple-500/20 hover:ring-offset-2 transform active:scale-[0.98] text-center"
         >
           Back to Home
         </Link>
@@ -126,6 +129,9 @@ function CodeStep({ sentEmail }: { sentEmail: string }) {
     >
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="text-center">
+          <div className="flex justify-center mb-4">
+            <img src="/favicon.ico" alt="Logo" className="w-16 h-16" />
+          </div>
           <h2 className="text-3xl font-bold text-gray-900 mb-2">Enter Verification Code</h2>
           <p className="text-gray-600">
             We sent a code to <strong>{sentEmail}</strong>
@@ -145,7 +151,7 @@ function CodeStep({ sentEmail }: { sentEmail: string }) {
           <input
             id="code"
             type="text"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-center text-2xl font-mono"
+            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-center text-2xl font-mono text-gray-900"
             placeholder="123456"
             value={code}
             onChange={(e) => setCode(e.target.value)}
