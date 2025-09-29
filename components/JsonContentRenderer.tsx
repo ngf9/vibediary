@@ -28,7 +28,7 @@ export default function JsonContentRenderer({ sections, inView = true }: JsonCon
             {section.level === 1 && (
               <h1
                 id={section.id}
-                className="text-4xl font-bold mt-8 mb-4 text-gray-900 scroll-mt-28 lg:scroll-mt-24"
+                className="text-4xl font-bold mt-8 mb-4 text-gray-900 scroll-mt-[130px] lg:scroll-mt-[110px]"
               >
                 {section.content}
               </h1>
@@ -36,7 +36,7 @@ export default function JsonContentRenderer({ sections, inView = true }: JsonCon
             {section.level === 2 && (
               <h2
                 id={section.id}
-                className="text-3xl font-semibold mt-16 mb-4 text-gray-900 scroll-mt-28 lg:scroll-mt-24"
+                className="text-3xl font-semibold mt-16 mb-4 text-gray-900 scroll-mt-[130px] lg:scroll-mt-[110px]"
               >
                 {section.content}
               </h2>
@@ -44,7 +44,7 @@ export default function JsonContentRenderer({ sections, inView = true }: JsonCon
             {section.level === 3 && (
               <h3
                 id={section.id}
-                className="text-2xl font-semibold mt-4 mb-2 text-gray-900 scroll-mt-28 lg:scroll-mt-24"
+                className="text-2xl font-semibold mt-4 mb-2 text-gray-900 scroll-mt-[130px] lg:scroll-mt-[110px]"
               >
                 {section.content}
               </h3>
@@ -52,7 +52,7 @@ export default function JsonContentRenderer({ sections, inView = true }: JsonCon
             {section.level === 4 && (
               <h4
                 id={section.id}
-                className="text-xl font-medium mt-3 mb-2 text-gray-800 scroll-mt-28 lg:scroll-mt-24"
+                className="text-xl font-medium mt-3 mb-2 text-gray-800 scroll-mt-[130px] lg:scroll-mt-[110px]"
               >
                 {section.content}
               </h4>

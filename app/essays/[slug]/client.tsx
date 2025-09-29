@@ -6,7 +6,6 @@ import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { motion, useScroll, useInView } from 'motion/react';
 import { useRef } from 'react';
-import DynamicLetterContent from '@/components/DynamicLetterContent';
 import LetterSectionNav from '@/components/LetterSectionNav';
 import JsonContentRenderer from '@/components/JsonContentRenderer';
 import { ContentSection } from '@/lib/markdown-parser';
@@ -17,28 +16,13 @@ interface Essay {
   title: string;
   subtitle?: string;
   excerpt?: string;
-  content?: string;
-  contentJson?: {
+  contentJson: {
     sections: ContentSection[];
     metadata?: any;
   };
-  sections?: any[]; // Legacy: Structured content sections
-  editorMode?: 'simple' | 'advanced';
   heroTitle?: string;
   heroSubtitle?: string;
   heroImage?: string;
-  letterContent?: {
-    title?: string;
-    subtitle?: string;
-    sections?: Array<{
-      id: string;
-      title: string;
-      content: string;
-      type?: string;
-      dividerStyle?: string;
-      navLabel?: string;
-    }>;
-  };
   published: boolean;
   featured?: boolean;
   publishedAt?: string;
@@ -53,78 +37,31 @@ interface EssayClientProps {
 }
 
 export default function EssayClient({ essay, allEssays }: EssayClientProps) {
-  // Use essay content - prioritize letterContent structure, fall back to simple content
   const heroTitle = essay.heroTitle || essay.title;
   const heroSubtitle = essay.heroSubtitle || essay.subtitle || '';
 
-  // Helper function to parse markdown headers and create sections
-  const parseMarkdownSections = (markdown: string) => {
-    // Match only h2 headers (##) in the markdown for navigation
-    const headerRegex = /^(#{2})\s+(.+)$/gm;
-    const headers: Array<{ level: number; text: string; position: number }> = [];
+  // Extract navigation from H2 headings in contentJson
+  const sections = useMemo(() => {
+    const extracted = essay.contentJson.sections
+      .filter(section => section.type === 'heading' && section.level === 2)
+      .map(section => ({
+        id: section.id,
+        navLabel: section.content || 'Section'
+      }));
 
-    let match;
-    while ((match = headerRegex.exec(markdown)) !== null) {
-      headers.push({
-        level: match[1].length,
-        text: match[2].trim(),
-        position: match.index
-      });
+    console.log('Sections extracted:', extracted);
+    return extracted;
+  }, [essay.contentJson]);
+
+  const [currentSection, setCurrentSection] = useState('');
+
+  // Initialize currentSection once sections are available
+  useEffect(() => {
+    if (sections.length > 0 && !currentSection) {
+      console.log('Initializing currentSection to:', sections[0].id);
+      setCurrentSection(sections[0].id);
     }
-
-    // If no headers found, return single section with all content
-    if (headers.length === 0) {
-      return [{
-        id: 'main-content',
-        title: '',
-        content: markdown,
-        type: 'paragraph',
-        navLabel: 'Essay'
-      }];
-    }
-
-    // Create sections from headers
-    const sections = headers.map((header, index) => {
-      const nextHeader = headers[index + 1];
-      const startPos = header.position;
-      const endPos = nextHeader ? nextHeader.position : markdown.length;
-
-      // Extract content from current header to next header (or end)
-      const sectionContent = markdown.substring(startPos, endPos).trim();
-
-      // Create slug from header text for ID
-      const id = header.text
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
-
-      return {
-        id: id || `section-${index}`,
-        title: header.text,
-        content: sectionContent,
-        type: 'paragraph',
-        navLabel: header.text
-      };
-    });
-
-    return sections;
-  };
-
-  // If essay has structured sections or letterContent, use it. Otherwise, create from markdown
-  const letterContent = essay.letterContent ||
-    (essay.sections && essay.sections.length > 0 ? {
-      title: essay.title,
-      subtitle: essay.subtitle,
-      sections: essay.sections
-    } : {
-      title: essay.title,
-      subtitle: essay.subtitle,
-      sections: essay.content ? parseMarkdownSections(essay.content) : []
-    });
-
-  // Scroll progress tracking
-  const { scrollYProgress } = useScroll();
-  const [currentSection, setCurrentSection] = useState('opening');
+  }, [sections, currentSection]);
 
   // Refs for scroll animations
   const heroRef = useRef(null);
@@ -134,116 +71,56 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
   const heroInView = useInView(heroRef, { once: true, margin: "-100px" });
   const letterInView = useInView(letterRef, { once: true, margin: "-100px" });
 
-  // Extract sections for navigation
-  const sections = useMemo(() => {
-    // If we have JSON content, extract navigation from H2 headings
-    if (essay.contentJson) {
-      return essay.contentJson.sections
-        .filter(section => section.type === 'heading' && section.level === 2)
-        .map(section => ({
-          id: section.id,
-          navLabel: section.content || 'Section'
-        }));
-    }
-
-    // Fall back to old navigation extraction
-    return letterContent.sections
-      ?.filter(section => 'id' in section)
-      .map((section, index) => {
-        const sectionWithId = section as { id: string; navLabel?: string; title?: string };
-        // Use navLabel if available, otherwise use title, or create a default label
-        const label = sectionWithId.navLabel ||
-                     sectionWithId.title ||
-                     `Section ${index + 1}`;
-        return {
-          id: sectionWithId.id,
-          navLabel: label
-        };
-      }) || [];
-  }, [essay.contentJson, letterContent.sections]);
-
-  // Track current section using IntersectionObserver for better accuracy
+  // Track current section with simplified scroll-based detection
   useEffect(() => {
     if (sections.length === 0) return;
 
     let timeoutId: NodeJS.Timeout;
-    const sectionStates = new Map<string, boolean>();
-
-    const observerOptions = {
-      rootMargin: '-15% 0px -75% 0px', // Adjusted for better detection
-      threshold: [0, 0.5, 1]
-    };
 
     const updateCurrentSection = () => {
-      // Find the topmost visible section
-      const scrollY = window.scrollY;
       const viewportHeight = window.innerHeight;
-      let currentId = sections[0]?.id;
-      let minDistance = Infinity;
+      const targetLine = viewportHeight * 0.25; // 25% from top of viewport
 
-      // Find section closest to top 25% of viewport
+      let currentId = sections[0]?.id;
+      let lastPassedSection: string | null = null;
+
+      // Find the most recent section that has scrolled past the target line
+      // This ensures we highlight the section you're currently reading, not the next one
       for (const section of sections) {
         const element = document.getElementById(section.id);
         if (element) {
           const rect = element.getBoundingClientRect();
-          const targetLine = viewportHeight * 0.25; // 25% from top
-          const distance = Math.abs(rect.top - targetLine);
 
-          // Update if this section is closer to our target line
-          if (distance < minDistance && rect.top < viewportHeight * 0.7) {
-            minDistance = distance;
-            currentId = section.id;
+          // If section heading has scrolled past (or is at) the target line, it's a candidate
+          if (rect.top <= targetLine + 50) { // +50px buffer for better feel
+            lastPassedSection = section.id;
           }
         }
       }
 
+      // Use the last section that passed the line, or default to first section
+      currentId = lastPassedSection || sections[0]?.id;
+
+      console.log('Setting currentSection to:', currentId);
+      console.log('Available section IDs:', sections.map(s => s.id));
+
       setCurrentSection(currentId);
     };
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        sectionStates.set(entry.target.id, entry.isIntersecting);
-      });
-
-      // Debounce the section update
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(updateCurrentSection, 50);
-    }, observerOptions);
-
-    // Observe all section headings
-    sections.forEach(section => {
-      const element = document.getElementById(section.id);
-      if (element) {
-        observer.observe(element);
-        sectionStates.set(section.id, false);
-      }
-    });
-
-    // Set initial section based on scroll position
-    const checkInitialSection = () => {
-      updateCurrentSection();
-    };
-
-    // Small delay to ensure DOM is ready
-    setTimeout(checkInitialSection, 100);
-
-    // Also update on scroll for immediate feedback
+    // Debounced scroll handler
     const handleScroll = () => {
       clearTimeout(timeoutId);
-      timeoutId = setTimeout(updateCurrentSection, 30);
+      timeoutId = setTimeout(updateCurrentSection, 100); // Single 100ms debounce
     };
+
+    // Set initial section
+    setTimeout(updateCurrentSection, 150);
 
     window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
       clearTimeout(timeoutId);
       window.removeEventListener('scroll', handleScroll);
-      sections.forEach(section => {
-        const element = document.getElementById(section.id);
-        if (element) {
-          observer.unobserve(element);
-        }
-      });
     };
   }, [sections]);
 
@@ -447,21 +324,12 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
       >
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_200px] gap-12">
-            {/* Letter Content */}
+            {/* Essay Content */}
             <div className="max-w-3xl mx-auto">
-
-              {/* Use JSON renderer if contentJson is available, otherwise fall back to old renderer */}
-              {essay.contentJson ? (
-                <JsonContentRenderer
-                  sections={essay.contentJson.sections}
-                  inView={letterInView}
-                />
-              ) : (
-                <DynamicLetterContent
-                  letterContent={letterContent}
-                  letterInView={letterInView}
-                />
-              )}
+              <JsonContentRenderer
+                sections={essay.contentJson.sections}
+                inView={letterInView}
+              />
             </div>
 
             {/* Side Navigation - only show if there are multiple sections */}

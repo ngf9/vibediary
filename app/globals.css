@@ -1087,6 +1087,26 @@ html {
   animation: glowPulse 2s ease-in-out infinite;
 }
 
+/* Pulsing ripple effect for active section indicator */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
 /* Hide scrollbar for horizontal timeline */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;

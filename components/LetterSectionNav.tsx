@@ -25,6 +25,12 @@ export default function LetterSectionNav({
 }: LetterSectionNavProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+
+  // Debug logging
+  useEffect(() => {
+    console.log('LetterSectionNav - currentSection:', currentSection);
+    console.log('LetterSectionNav - sections:', sections.map(s => ({ id: s.id, label: s.navLabel })));
+  }, [currentSection, sections]);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showLeftGradient, setShowLeftGradient] = useState(false);
   const [showRightGradient, setShowRightGradient] = useState(true);
@@ -149,44 +155,55 @@ export default function LetterSectionNav({
                   
                   {/* Navigation Items */}
                   <ul className="space-y-2">
-                    {sections.map((section) => (
+                    {sections.map((section) => {
+                      const isActive = currentSection === section.id;
+                      if (isActive) {
+                        console.log(`Active section match: "${currentSection}" === "${section.id}"`, isActive);
+                      }
+
+                      return (
                       <li key={section.id} className="relative">
                         <button
                           onClick={() => onSectionClick(section.id)}
                           className={cn(
                             "group flex items-center gap-3 transition-all duration-150 -ml-1 pl-2 pr-4 py-2 rounded-lg w-full",
-                            currentSection === section.id
+                            isActive
                               ? "bg-gradient-to-r from-purple-50 to-blue-50"
                               : "hover:bg-gray-50"
                           )}
                         >
                           {/* Dot with pulsing effect */}
-                          <div className="relative flex-shrink-0 flex items-center justify-center w-4 h-4">
-                            {currentSection === section.id ? (
+                          <div className="relative flex-shrink-0 flex items-center justify-center w-5 h-5">
+                            {isActive ? (
                               <>
-                                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 animate-pulse" />
-                                <div className="relative w-2.5 h-2.5 rounded-full bg-gradient-to-r from-purple-600 to-blue-600" />
+                                {/* Pulsing ring effect */}
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                  <div className="w-4 h-4 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 opacity-60 animate-pulse-ring" />
+                                </div>
+                                {/* Solid center dot */}
+                                <div className="relative z-10 w-2.5 h-2.5 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 shadow-sm" />
                               </>
                             ) : (
                               <div className="w-2 h-2 rounded-full bg-gray-400 group-hover:bg-gray-600 transition-all duration-150" />
                             )}
                           </div>
-                          
+
                           {/* Label with clear active state */}
                           <span
                             className={cn(
-                              "text-sm whitespace-nowrap truncate max-w-[180px] transition-all duration-150",
-                              currentSection === section.id
+                              "text-sm whitespace-nowrap max-w-[180px] transition-all duration-150",
+                              isActive
                                 ? "text-gray-900 font-bold"
                                 : "text-gray-600 group-hover:text-gray-800"
                             )}
                             title={section.navLabel}
                           >
-                            {section.navLabel}
+                            {section.navLabel.length > 25 ? section.navLabel.substring(0, 25) + '...' : section.navLabel}
                           </span>
                         </button>
                       </li>
-                    ))}
+                    );
+                    })}
                   </ul>
                 </div>
             </div>
@@ -244,8 +261,9 @@ export default function LetterSectionNav({
                     ? "text-gray-900 font-semibold"
                     : "text-gray-600 active:text-gray-800"
                 )}
+                title={section.navLabel}
               >
-                {section.navLabel}
+                {section.navLabel.length > 25 ? section.navLabel.substring(0, 25) + '...' : section.navLabel}
               </span>
 
               {/* Active Bar Indicator */}
