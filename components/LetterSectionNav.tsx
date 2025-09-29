@@ -26,11 +26,13 @@ export default function LetterSectionNav({
   const [isVisible, setIsVisible] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  // Debug logging
+  // Debug logging - only log when currentSection changes
   useEffect(() => {
-    console.log('LetterSectionNav - currentSection:', currentSection);
-    console.log('LetterSectionNav - sections:', sections.map(s => ({ id: s.id, label: s.navLabel })));
-  }, [currentSection, sections]);
+    if (currentSection) {
+      console.log('LetterSectionNav - currentSection:', currentSection);
+      console.log('LetterSectionNav - sections:', sections.map(s => ({ id: s.id, label: s.navLabel })));
+    }
+  }, [currentSection]);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showLeftGradient, setShowLeftGradient] = useState(false);
   const [showRightGradient, setShowRightGradient] = useState(true);
@@ -157,31 +159,40 @@ export default function LetterSectionNav({
                   <ul className="space-y-2">
                     {sections.map((section) => {
                       const isActive = currentSection === section.id;
-                      if (isActive) {
-                        console.log(`Active section match: "${currentSection}" === "${section.id}"`, isActive);
-                      }
 
                       return (
                       <li key={section.id} className="relative">
                         <button
                           onClick={() => onSectionClick(section.id)}
                           className={cn(
-                            "group flex items-center gap-3 transition-all duration-150 -ml-1 pl-2 pr-4 py-2 rounded-lg w-full",
+                            "group flex items-center gap-3 transition-all duration-150 -ml-1 pl-2 pr-6 py-2 rounded-lg w-full",
                             isActive
                               ? "bg-gradient-to-r from-purple-50 to-blue-50"
                               : "hover:bg-gray-50"
                           )}
                         >
                           {/* Dot with pulsing effect */}
-                          <div className="relative flex-shrink-0 flex items-center justify-center w-5 h-5">
+                          <div className="relative flex-shrink-0 flex items-center justify-center w-6 h-6">
                             {isActive ? (
                               <>
                                 {/* Pulsing ring effect */}
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                  <div className="w-4 h-4 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 opacity-60 animate-pulse-ring" />
+                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                  <div
+                                    className="w-5 h-5 rounded-full animate-pulse-ring"
+                                    style={{
+                                      background: 'linear-gradient(to right, rgb(168, 85, 247), rgb(249, 115, 22))',
+                                      opacity: 0.7
+                                    }}
+                                  />
                                 </div>
                                 {/* Solid center dot */}
-                                <div className="relative z-10 w-2.5 h-2.5 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 shadow-sm" />
+                                <div
+                                  className="relative z-10 w-3 h-3 rounded-full shadow-lg"
+                                  style={{
+                                    background: 'linear-gradient(to right, rgb(147, 51, 234), rgb(234, 88, 12))',
+                                    boxShadow: '0 0 10px rgba(168, 85, 247, 0.5)'
+                                  }}
+                                />
                               </>
                             ) : (
                               <div className="w-2 h-2 rounded-full bg-gray-400 group-hover:bg-gray-600 transition-all duration-150" />
@@ -198,7 +209,7 @@ export default function LetterSectionNav({
                             )}
                             title={section.navLabel}
                           >
-                            {section.navLabel.length > 25 ? section.navLabel.substring(0, 25) + '...' : section.navLabel}
+                            {section.navLabel.length > 20 ? section.navLabel.substring(0, 20) + '...' : section.navLabel}
                           </span>
                         </button>
                       </li>
