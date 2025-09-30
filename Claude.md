@@ -143,7 +143,7 @@ We maintain two separate InstantDB configurations:
   const adminDb = init({ appId, adminToken, schema });
   ```
 
-- **Client-Side (`/lib/instant.ts`)**: Uses the React SDK for client-side interactions (form submissions)
+- **Client-Side (`/lib/instant.ts`)**: Uses the React SDK for client-side interactions (admin forms, mutations)
   ```typescript
   import { init } from '@instantdb/react';
   export const db = init({ appId, schema });
@@ -154,18 +154,48 @@ We maintain two separate InstantDB configurations:
 All pages use **async Server Components** to fetch data before rendering:
 
 ```typescript
-// Example: app/page.tsx
+// Example: app/page.tsx (Homepage - Essays)
 export default async function Home() {
-  const cohortDates = await getCohortDates(); // Server-side fetch
-  return <VanGoghLayout cohortDates={cohortDates} />; // Pass to client
+  const allEssays = await getEssays(); // Server-side fetch
+  return <SimpleLayout essays={allEssays} allEssays={allEssays} />; // Pass to client
+}
+
+// Example: app/projects/page.tsx
+export default async function ProjectsPage() {
+  const projects = await getProjects(); // Server-side fetch
+  return <ProjectsClient projects={projects} />; // Pass to client
+}
+
+// Example: app/essays/[slug]/page.tsx (Dynamic route with SEO)
+export default async function EssayPage({ params }: PageProps) {
+  const resolvedParams = await params;
+  const [essay, allEssays] = await Promise.all([
+    getEssayBySlug(resolvedParams.slug),
+    getEssays() // For navigation dropdown
+  ]);
+
+  if (!essay) notFound();
+
+  return <EssayClient essay={essay} allEssays={allEssays} />;
+}
+
+// Also generates static params and metadata for SEO
+export async function generateStaticParams() {
+  const essays = await getEssays();
+  return essays.map((essay) => ({ slug: essay.slug }));
 }
 ```
 
-Key helper functions in `/lib/instant-server.ts`:
-- `getPageContent()` - Fetches CMS content for pages
-- `getSyllabus()` - Retrieves course syllabus data
-- `getCohortDates()` - Gets specific cohort information
-- `getAllCohortDates()` - Fetches all active cohorts for dropdowns
+Key helper functions in `/lib/instant-server-portfolio.ts`:
+- `getProjects()` - Fetches all projects (completed & in-progress)
+- `getFeaturedProjects()` - Retrieves featured projects for homepage
+- `getProjectBySlug(slug)` - Gets single project by slug
+- `getProjectContent(projectId)` - Fetches detailed project content
+- `getEssays()` - Fetches all published essays
+- `getFeaturedEssays()` - Retrieves featured essays
+- `getEssayBySlug(slug)` - Gets single essay by slug
+- `getAboutContent()` - Fetches about page content
+- `getSiteSettings(key?)` - Retrieves site-wide settings
 
 #### 3. **Data Flow: Server to Client**
 
@@ -175,12 +205,12 @@ The data flows through the component hierarchy via props:
 Server Component (page.tsx)
   ↓ Fetches data with adminDb
   ↓ Passes as props
-Client Component (Layout/Container)
+Client Component (SimpleLayout/ProjectsClient/EssayClient)
   ↓ Receives data as props
   ↓ Passes to children
-Interactive Components (Forms, etc.)
+Interactive Components (Navigation, EssayList, GridCards)
   ↓ Uses data for display
-  ↓ Submits new data via client db
+  ↓ Admin forms use client db for mutations
 ```
 
 #### 4. **SEO Benefits**
@@ -188,17 +218,28 @@ Interactive Components (Forms, etc.)
 1. **Full HTML on First Load**: Search engines receive complete HTML with all content, not empty shells waiting for JavaScript
 2. **Faster Time to First Byte (TTFB)**: Data is fetched during server rendering, not after page load
 3. **No JavaScript Required**: Content is accessible even with JavaScript disabled
-4. **Meta Tags with Real Data**: Dynamic meta tags can use actual database content
+4. **Meta Tags with Real Data**: Dynamic meta tags can use actual database content (see essay detail pages)
 5. **Improved Core Web Vitals**: No layout shift from loading states, better LCP scores
 
-#### 5. **Implementation Example: Dynamic Form Dropdowns**
+#### 5. **Implementation Examples**
 
-Recent implementation of dynamic cohort dropdowns demonstrates the pattern:
+**Example 1: Homepage with Essays**
+1. **Server fetches**: `getEssays()` in `app/page.tsx`
+2. **Props passed**: To `SimpleLayout` component
+3. **Navigation populated**: `Navigation` component receives essays for dropdown
+4. **No client fetching**: All content rendered immediately
 
-1. **Server fetches all cohorts**: `getAllCohortDates()` in page.tsx
-2. **Props passed down**: Through VanGoghLayout → CTASection/Navigation → FormModal
-3. **Dynamic rendering**: FormModal receives cohortDates and renders options
-4. **No client fetching**: Dropdown is populated on initial render
+**Example 2: Dynamic Essay Pages with SEO**
+1. **Static generation**: `generateStaticParams()` pre-renders all essay routes
+2. **SEO metadata**: `generateMetadata()` creates unique title/description per essay
+3. **Parallel fetching**: `Promise.all()` fetches essay + all essays simultaneously
+4. **404 handling**: Server-side `notFound()` for missing essays
+
+**Example 3: Projects Page**
+1. **Server fetches**: `getProjects()` in `app/projects/page.tsx`
+2. **Props passed**: To `ProjectsClient` for interactive filtering
+3. **Initial render**: All project cards visible immediately
+4. **Client filtering**: JavaScript enhances UX without blocking initial render
 
 ### Best Practices
 
@@ -219,13 +260,29 @@ INSTANT_ADMIN_TOKEN=your-admin-token    # Server-only, for secure fetching
 
 ```
 /lib
-  ├── instant.ts          # Client-side InstantDB setup
-  ├── instant-admin.ts    # Server-side admin setup
-  └── instant-server.ts   # Server-side query functions
+  ├── instant.ts                    # Client-side InstantDB setup (used in admin)
+  ├── instant-admin.ts              # Server-side admin setup
+  └── instant-server-portfolio.ts   # Portfolio-specific server queries
 /app
-  └── [route]/page.tsx    # Async server components with data fetching
+  ├── page.tsx                      # Homepage: fetches essays
+  ├── projects/
+  │   ├── page.tsx                  # Projects list: fetches all projects
+  │   ├── client.tsx                # Client component with filtering
+  │   └── [slug]/
+  │       ├── page.tsx              # Project detail: fetches single project
+  │       └── client.tsx            # Client component for display
+  ├── essays/[slug]/
+  │   ├── page.tsx                  # Essay detail: fetches essay + generates SEO
+  │   └── client.tsx                # Client component for essay display
+  └── about/
+      ├── page.tsx                  # About page: fetches about content
+      └── client.tsx                # Client component for about display
 /components
-  └── *.tsx              # Client components receive data via props
+  ├── SimpleLayout.tsx              # Main layout receiving essays
+  ├── Navigation.tsx                # Nav component with essay dropdown
+  ├── ProjectsClient.tsx            # Projects display with filtering
+  ├── EssayClient.tsx               # Essay display component
+  └── *.tsx                         # Other client components
 ```
 
 ### Key Advantages Over Client-Side Fetching
@@ -235,5 +292,6 @@ INSTANT_ADMIN_TOKEN=your-admin-token    # Server-only, for secure fetching
 3. **Security**: Admin token never exposed to client
 4. **Consistency**: All users see the same initial data
 5. **Progressive Enhancement**: Works without JavaScript
+6. **Static Generation**: Essay and project pages can be pre-rendered at build time
 
-This architecture ensures your AI Study Camp website is fully optimized for search engines while maintaining the real-time capabilities of InstantDB where needed (like form submissions).
+This architecture ensures your **Diary of a Vibe Coder portfolio** is fully optimized for search engines while maintaining the interactive capabilities needed for admin features and client-side filtering.
