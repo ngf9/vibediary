@@ -6,6 +6,7 @@ import Footer from '@/components/Footer';
 import Image from 'next/image';
 import { motion, useInView } from 'motion/react';
 import { useRef } from 'react';
+import ReactMarkdown from 'react-markdown';
 
 interface Essay {
   id: string;
@@ -87,18 +88,6 @@ export default function AboutPageClient({
       <Navigation essays={essays} />
 
       <div className="relative z-10 pt-32">
-        {/* Header */}
-        <motion.div
-          className="text-center mb-20 px-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-        >
-          <h1 className="text-6xl lg:text-7xl font-bold text-gray-900">
-            About Me
-          </h1>
-        </motion.div>
-
         {/* Our Philosophy Section */}
         <motion.div
           ref={philosophyRef}
@@ -114,16 +103,13 @@ export default function AboutPageClient({
               animate={philosophyInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
             >
-              <div className="space-y-6 text-lg text-gray-700 leading-relaxed">
-                <br />
+              <h1 className="text-6xl lg:text-7xl font-bold text-gray-900 mb-8">
+                About Me
+              </h1>
+              <div className="prose prose-lg prose-gray max-w-none text-gray-700 leading-relaxed">
                 {philosophyContent.map((paragraph, index) => (
-                  <p key={index}>{paragraph}</p>
+                  <ReactMarkdown key={index}>{paragraph}</ReactMarkdown>
                 ))}
-                <div className="bg-blue/10 border-l-4 border-blue p-6 rounded-r-lg mb-16">
-                  <p className="font-medium text-gray-800">
-                    &quot;The best way to predict the future is to build it. I&apos;m here to share the tools, knowledge, and confidence to do exactly that.&quot;
-                  </p>
-                </div>
               </div>
             </motion.div>
           </div>
@@ -147,16 +133,27 @@ export default function AboutPageClient({
               My Journey
             </motion.h2>
 
-            {/* Desktop Layout with 3 columns */}
+            {/* Desktop Layout with row-based grid */}
             <div className="hidden lg:grid grid-cols-12 gap-8 max-w-7xl mx-auto">
-              {/* Left Column - Cards (5 columns) */}
-              <div className="col-span-5">
-                <div className="relative">
-                  {milestones.map((milestone, index) => (
+              {/* Left side: Milestones with timeline */}
+              <div className="col-span-6 relative">
+                {/* Vertical timeline line */}
+                <div className="absolute right-0 top-0 bottom-0 w-px bg-gray-200/50 z-0">
+                  <motion.div
+                    className="w-full h-full bg-gray-300/50"
+                    initial={{ scaleY: 0 }}
+                    animate={timelineInView ? { scaleY: 1 } : { scaleY: 0 }}
+                    transition={{ duration: 1.5, delay: 0.3, ease: "easeOut" }}
+                    style={{ transformOrigin: "top" }}
+                  />
+                </div>
+
+                {/* Milestone rows */}
+                {milestones.map((milestone, index) => (
+                  <div key={milestone.id} className={`relative flex items-center ${index < milestones.length - 1 ? 'mb-24' : ''}`}>
+                    {/* Card */}
                     <motion.div
-                      key={milestone.id}
-                      className="relative"
-                      style={{ marginBottom: index < milestones.length - 1 ? '80px' : '0' }}
+                      style={{ width: 'calc(100% - 5rem)' }}
                       initial={{ opacity: 0, x: -50 }}
                       animate={timelineInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -50 }}
                       transition={{ duration: 0.6, delay: 0.3 + index * 0.15, ease: "easeOut" }}
@@ -167,66 +164,42 @@ export default function AboutPageClient({
                         <p className="text-gray-600 leading-relaxed">{milestone.description}</p>
                       </div>
                     </motion.div>
-                  ))}
-                </div>
-              </div>
 
-              {/* Middle Column - Timeline (2 columns) */}
-              <div className="col-span-2">
-                <div className="relative h-full flex justify-center">
-                  {/* Center Line */}
-                  <div className="absolute w-px h-full bg-gray-200/50">
+                    {/* Horizontal connecting line */}
                     <motion.div
-                      className="w-full h-full bg-gray-300/50"
-                      initial={{ scaleY: 0 }}
-                      animate={timelineInView ? { scaleY: 1 } : { scaleY: 0 }}
-                      transition={{ duration: 1.5, delay: 0.3, ease: "easeOut" }}
-                      style={{ transformOrigin: "top" }}
+                      className="absolute h-0.5 bg-gray-300 z-0"
+                      style={{ width: '3.75rem', right: '1.25rem' }}
+                      initial={{ scaleX: 0, opacity: 0 }}
+                      animate={timelineInView ? { scaleX: 1, opacity: 1 } : { scaleX: 0, opacity: 0 }}
+                      transition={{ duration: 0.5, delay: 0.4 + index * 0.15, ease: "easeOut" }}
                     />
-                  </div>
 
-                  {/* Dots aligned with cards */}
-                  <div className="relative w-full h-full">
-                    {milestones.map((milestone, index) => {
-                      // Calculate position based on card heights and gaps
-                      const cardHeight = 156; // Approximate height of card with padding
-                      const gap = 80; // Match the marginBottom
-                      const topPosition = index * (cardHeight + gap) + cardHeight / 2 - 20; // Center dot vertically with card (20px is half of 40px circle)
-
-                      return (
+                    {/* Circle on timeline */}
+                    <motion.div
+                      className="absolute transform translate-x-1/2 z-10"
+                      style={{ right: '0' }}
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={timelineInView ? { scale: 1, opacity: 1 } : { scale: 0, opacity: 0 }}
+                      transition={{ duration: 0.8, delay: 0.3 + index * 0.15, ease: "easeOut" }}
+                    >
+                      <div className="relative w-10 h-10 rounded-full bg-blue text-white flex items-center justify-center font-bold text-sm shadow-lg transition-all duration-300 hover:scale-110 group">
                         <div
-                          key={`dot-${milestone.id}`}
-                          className="absolute left-1/2 transform -translate-x-1/2"
-                          style={{ top: `${topPosition}px` }}
-                        >
-                          <motion.div
-                            initial={{ scale: 0, opacity: 0 }}
-                            animate={timelineInView ? { scale: 1, opacity: 1 } : { scale: 0, opacity: 0 }}
-                            transition={{ duration: 0.8, delay: 0.3 + index * 0.15, ease: "easeOut" }}
-                            className="group relative"
-                          >
-                            {/* Circle with number */}
-                            <div className="relative w-10 h-10 rounded-full bg-blue text-white flex items-center justify-center font-bold text-sm shadow-lg transition-all duration-300 group-hover:scale-110">
-                              <div
-                                className="absolute inset-0 rounded-full bg-blue"
-                                style={{
-                                  boxShadow: '0 0 0 3px rgba(84, 51, 255, 0.2), 0 0 10px rgba(84, 51, 255, 0.3)'
-                                }}
-                              />
-                              <span className="relative z-10">{index + 1}</span>
-                            </div>
-                          </motion.div>
-                        </div>
-                      );
-                    })}
+                          className="absolute inset-0 rounded-full bg-blue"
+                          style={{
+                            boxShadow: '0 0 0 3px rgba(84, 51, 255, 0.2), 0 0 10px rgba(84, 51, 255, 0.3)'
+                          }}
+                        />
+                        <span className="relative z-10">{index + 1}</span>
+                      </div>
+                    </motion.div>
                   </div>
-                </div>
+                ))}
               </div>
 
-              {/* Right Column - Image (5 columns) */}
-              <div className="col-span-5">
+              {/* Right Column - Image (6 columns) */}
+              <div className="col-span-6">
                 <motion.div
-                  className="sticky top-32"
+                  className="sticky top-32 max-w-md mx-auto"
                   initial={{ opacity: 0, x: 30 }}
                   animate={timelineInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 30 }}
                   transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
