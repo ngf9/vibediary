@@ -41,11 +41,11 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
   const heroTitle = essay.heroTitle || essay.title;
   const heroSubtitle = essay.heroSubtitle || essay.subtitle || '';
 
-  // Extract navigation from H2 headings in contentJson
+  // Extract navigation from H1 headings in contentJson
   const sections = useMemo(() => {
     if (!essay.contentJson) return [];
     const extracted = essay.contentJson.sections
-      .filter(section => section.type === 'heading' && section.level === 2)
+      .filter(section => section.type === 'heading' && section.level === 1)
       .map(section => ({
         id: section.id,
         navLabel: section.content || 'Section'
@@ -181,7 +181,7 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
               style={{ objectFit: 'cover' }}
               priority
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/40" />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
           </motion.div>
 
           {/* Hero Content */}
@@ -319,7 +319,7 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
       {/* Main Content Section */}
       <motion.section
         ref={letterRef}
-        className="relative py-10 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8"
+        className="relative pt-32 sm:pt-40 lg:pt-48 pb-10 sm:pb-16 lg:pb-20 px-4 sm:px-6 lg:px-8"
         initial={{ opacity: 0 }}
         animate={{ opacity: letterInView ? 1 : 0 }}
         transition={{ duration: 0.8 }}

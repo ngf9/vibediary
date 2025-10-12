@@ -83,7 +83,7 @@ export default function JsonContentRenderer({ sections, inView = true }: JsonCon
             initial={{ opacity: 0, scale: 0.95 }}
             animate={inView ? { opacity: 1, scale: 1 } : { opacity: 0 }}
             transition={{ duration: 0.6, delay: baseDelay }}
-            className="my-4 sm:my-6 lg:my-8 -mx-4 sm:mx-0"
+            className="mt-4 mb-8 sm:mt-6 sm:mb-10 lg:mt-8 lg:mb-12 -mx-4 sm:mx-0"
           >
             <Image
               src={section.src || ''}

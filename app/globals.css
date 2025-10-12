@@ -1033,6 +1033,12 @@ body.bw-mode .bg-purple-400.opacity-30 {
   line-height: 1.75;
 }
 
+.prose > *:first-child,
+.prose p:first-child,
+.max-w-none > *:first-child {
+  margin-top: 0 !important;
+}
+
 .prose h2 {
   margin-top: 6rem !important;
   margin-bottom: 1rem;
