@@ -130,7 +130,7 @@ export default function AboutPageClient({
               animate={timelineInView ? { opacity: 1, y: 0 } : { opacity: 0, y: -20 }}
               transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
             >
-              My Journey
+              My Vibe Coding Journey
             </motion.h2>
 
             {/* Desktop Layout with row-based grid */}
@@ -213,6 +213,7 @@ export default function AboutPageClient({
                       sizes="(max-width: 1024px) 100vw, 500px"
                       priority
                     />
+                    <div className="absolute inset-0 bg-black/20 rounded-3xl" />
                   </div>
                 </motion.div>
               </div>

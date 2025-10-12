@@ -319,7 +319,7 @@ export default function EssayClient({ essay, allEssays }: EssayClientProps) {
       {/* Main Content Section */}
       <motion.section
         ref={letterRef}
-        className="relative pt-32 sm:pt-40 lg:pt-48 pb-10 sm:pb-16 lg:pb-20 px-4 sm:px-6 lg:px-8"
+        className="relative pt-24 sm:pt-32 lg:pt-40 pb-10 sm:pb-16 lg:pb-20 px-4 sm:px-6 lg:px-8"
         initial={{ opacity: 0 }}
         animate={{ opacity: letterInView ? 1 : 0 }}
         transition={{ duration: 0.8 }}
