@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { db } from '@/lib/instant';
 import { id } from '@instantdb/react';
 import { motion } from 'framer-motion';
+import ImageUploader from '@/components/admin/ImageUploader';
 
 export default function ProjectContentPage() {
   const [selectedProjectId, setSelectedProjectId] = useState('');
@@ -126,13 +127,6 @@ export default function ProjectContentPage() {
 
   const removeLearning = (index: number) => {
     setLearnings(learnings.filter((_, i) => i !== index));
-  };
-
-  const addImage = () => {
-    if (newImage.trim()) {
-      setGallery([...gallery, newImage.trim()]);
-      setNewImage('');
-    }
   };
 
   const removeImage = (index: number) => {
@@ -436,22 +430,18 @@ export default function ProjectContentPage() {
             <h2 className="text-xl font-semibold text-gray-900 mb-6">Image Gallery</h2>
 
             <div className="mb-4">
-              <div className="flex gap-2">
-                <input
-                  type="url"
-                  value={newImage}
-                  onChange={(e) => setNewImage(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addImage())}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="https://example.com/image.jpg"
-                />
-                <button
-                  onClick={addImage}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-                >
-                  Add Image
-                </button>
-              </div>
+              <ImageUploader
+                value={newImage}
+                onChange={(url) => {
+                  if (url) {
+                    setGallery([...gallery, url]);
+                    setNewImage('');
+                  }
+                }}
+                storagePath={`projects/${selectedProjectId}/gallery`}
+                aspectRatio="16:9"
+                placeholder="Upload gallery image or enter URL"
+              />
             </div>
 
             {gallery.length > 0 ? (

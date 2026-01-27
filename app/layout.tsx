@@ -59,7 +59,7 @@ export default function RootLayout({
         <link rel="preload" as="image" type="image/webp" href="/aifront2-optimized.webp" />
         <link rel="preload" as="image" type="image/webp" href="/vibefront2-optimized.webp" />
       </head>
-      <body className="antialiased overflow-x-hidden">
+      <body className="antialiased overflow-x-hidden bg-white">
         <Providers>{children}</Providers>
       </body>
     </html>

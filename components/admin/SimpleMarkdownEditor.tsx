@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import Image from 'next/image';
+import { Upload, Loader2 } from 'lucide-react';
+import { db } from '@/lib/instant';
 
 interface SimpleMarkdownEditorProps {
   value: string;
@@ -20,7 +22,19 @@ export default function SimpleMarkdownEditor({
 }: SimpleMarkdownEditorProps) {
   const [activeTab, setActiveTab] = useState<'write' | 'preview' | 'split'>('split');
   const [showImageHelper, setShowImageHelper] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const imageFileInputRef = useRef<HTMLInputElement>(null);
+
+  // Query recently uploaded files for the gallery
+  const { data: recentFilesData } = db.useQuery({
+    $files: {
+      $: {
+        limit: 12,
+      }
+    }
+  });
+  const recentFiles = recentFilesData?.$files || [];
 
   // Available images in public folder
   const availableImages = [
@@ -71,6 +85,42 @@ export default function SimpleMarkdownEditor({
     setShowImageHelper(false);
   };
 
+  // Handle image file upload to InstantDB storage
+  const handleImageUpload = async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File must be less than 5MB');
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const timestamp = Date.now();
+      const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const path = `markdown-images/${timestamp}-${sanitizedName}`;
+
+      await db.storage.uploadFile(path, file);
+
+      const result = await db.queryOnce({
+        $files: { $: { where: { path } } }
+      });
+      const url = result.data.$files?.[0]?.url;
+
+      if (url) {
+        const altText = file.name.replace(/\.[^/.]+$/, '');
+        insertImage(url, altText);
+      }
+    } catch (error) {
+      console.error('Upload failed:', error);
+      alert('Failed to upload image');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   // Toolbar actions
   const toolbarActions = [
     { icon: 'B', label: 'Bold', action: () => insertAtCursor('**', '**') },
@@ -85,6 +135,7 @@ export default function SimpleMarkdownEditor({
     { icon: '< >', label: 'Code', action: () => insertAtCursor('`', '`') },
     { icon: '{ }', label: 'Code Block', action: () => insertAtCursor('```\n', '\n```') },
     { icon: '🖼', label: 'Image', action: () => setShowImageHelper(!showImageHelper), special: true },
+    { icon: '▶', label: 'YouTube Video', action: () => insertAtCursor('\nhttps://www.youtube.com/watch?v=VIDEO_ID\n') },
   ];
 
   // Handle Tab key for indentation
@@ -173,11 +224,45 @@ export default function SimpleMarkdownEditor({
                 </svg>
               </button>
             </div>
+
+            {/* Upload Section */}
+            <div className="mb-3 pb-3 border-b border-gray-100">
+              <p className="text-xs font-medium text-gray-600 mb-2">Upload Image:</p>
+              <label className={`flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${
+                isUploading ? 'border-purple-400 bg-purple-50' : 'border-gray-300 hover:border-purple-400 hover:bg-purple-50/50'
+              }`}>
+                {isUploading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin text-purple-600" />
+                    <span className="text-sm text-purple-600">Uploading...</span>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4 text-gray-500" />
+                    <span className="text-sm text-gray-600">Click to upload image</span>
+                  </>
+                )}
+                <input
+                  ref={imageFileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  disabled={isUploading}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleImageUpload(file);
+                    e.target.value = '';
+                  }}
+                />
+              </label>
+            </div>
+
+            {/* URL Input */}
             <div className="flex gap-2 mb-3">
               <input
                 type="text"
                 id="image-url-input"
-                placeholder="Image URL or path (e.g., /image.png or https://...)"
+                placeholder="Or paste image URL (e.g., /image.png or https://...)"
                 className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
@@ -209,7 +294,39 @@ export default function SimpleMarkdownEditor({
           </div>
 
           <div>
-            <p className="text-xs font-medium text-gray-600 mb-2">Available Images:</p>
+            {/* Recently Uploaded Images */}
+            {recentFiles.length > 0 && (
+              <div className="mb-3">
+                <p className="text-xs font-medium text-gray-600 mb-2">Recently Uploaded:</p>
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                  {recentFiles.map((file: any) => (
+                    <button
+                      key={file.id}
+                      type="button"
+                      onClick={() => {
+                        const name = file.path?.split('/').pop()?.replace(/^\d+-/, '') || 'Image';
+                        insertImage(file.url, name);
+                      }}
+                      className="group relative aspect-square border border-gray-200 rounded overflow-hidden hover:border-purple-500 transition-colors"
+                      title={file.path}
+                    >
+                      <img
+                        src={file.url}
+                        alt={file.path}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="absolute bottom-1 left-1 right-1 text-white text-xs truncate">
+                          {file.path?.split('/').pop()?.replace(/^\d+-/, '') || 'Image'}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <p className="text-xs font-medium text-gray-600 mb-2">Local Images:</p>
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
               {availableImages.map((img) => (
                 <button
@@ -241,10 +358,10 @@ export default function SimpleMarkdownEditor({
             <div className="text-xs text-gray-500 mt-3 space-y-1 border-t border-gray-100 pt-3">
               <p className="font-medium">Quick tips:</p>
               <ul className="ml-4 space-y-0.5">
-                <li>• Insert at cursor: Click image or paste URL above</li>
+                <li>• Upload: Click the upload area above to upload from your computer</li>
+                <li>• Insert at cursor: Click any image or paste URL</li>
                 <li>• Manual insert: <code className="bg-gray-100 px-1 rounded">![description](url)</code></li>
                 <li>• Add caption: Type <code className="bg-gray-100 px-1 rounded">*caption text*</code> on next line</li>
-                <li>• Center image: Put image on its own line</li>
               </ul>
             </div>
           </div>
@@ -277,7 +394,35 @@ export default function SimpleMarkdownEditor({
             <div className={`${activeTab === 'split' ? 'w-1/2' : 'w-full'} overflow-auto bg-gray-50`}>
               <div className="p-4 prose prose-sm max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-purple-600 prose-code:text-purple-600 prose-code:bg-purple-50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-blockquote:border-purple-500 prose-blockquote:text-gray-600 prose-ul:text-gray-700 prose-ol:text-gray-700 prose-img:rounded-lg prose-img:shadow-lg prose-img:my-4">
                 {value ? (
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      p: ({ children, ...props }) => {
+                        const child = Array.isArray(children) ? children[0] : children;
+                        if (typeof child === 'string') {
+                          const ytMatch = child.trim().match(
+                            /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:\S*)$/
+                          );
+                          if (ytMatch) {
+                            return (
+                              <div className="my-4">
+                                <div className="relative w-full overflow-hidden rounded-lg" style={{ paddingBottom: '56.25%' }}>
+                                  <iframe
+                                    src={`https://www.youtube.com/embed/${ytMatch[1]}`}
+                                    title="YouTube video preview"
+                                    className="absolute top-0 left-0 w-full h-full"
+                                    frameBorder="0"
+                                    allowFullScreen
+                                  />
+                                </div>
+                              </div>
+                            );
+                          }
+                        }
+                        return <p {...props}>{children}</p>;
+                      }
+                    }}
+                  >
                     {value}
                   </ReactMarkdown>
                 ) : (

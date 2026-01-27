@@ -3,6 +3,12 @@ import { i } from '@instantdb/react';
 // Portfolio-focused schema for Diary of a Vibe Coder
 const _schema = i.schema({
   entities: {
+    // InstantDB Storage - required for file uploads
+    $files: i.entity({
+      path: i.string().unique().indexed(),
+      url: i.string(),
+    }),
+
     // Main projects entity - showcases vibe coded projects
     projects: i.entity({
       slug: i.string().indexed().unique(), // URL-friendly identifier

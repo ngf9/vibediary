@@ -170,6 +170,31 @@ export default function JsonContentRenderer({ sections, inView = true }: JsonCon
           />
         );
 
+      case 'video':
+        return (
+          <motion.div
+            key={section.id}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={inView ? { opacity: 1, scale: 1 } : { opacity: 0 }}
+            transition={{ duration: 0.6, delay: baseDelay }}
+            className="my-6 sm:my-8 lg:my-10 -mx-4 sm:mx-0"
+          >
+            <div
+              className="relative w-full overflow-hidden rounded-none sm:rounded-lg shadow-md sm:shadow-lg"
+              style={{ paddingBottom: '56.25%' }}
+            >
+              <iframe
+                src={`https://www.youtube.com/embed/${section.videoId}`}
+                title="YouTube video"
+                className="absolute top-0 left-0 w-full h-full"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          </motion.div>
+        );
+
       default:
         return null;
     }

@@ -40,7 +40,7 @@ export default function SimpleLayout({ essays, allEssays }: SimpleLayoutProps) {
       <Navigation essays={allEssays} />
 
       {/* Main Content */}
-      <div className="pt-24 pb-16">
+      <div className="pt-24 pb-48">
         {/* Essay List */}
         <EssayList essays={sortedEssays} />
       </div>

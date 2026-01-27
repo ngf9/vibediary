@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { db } from '@/lib/instant';
 import { id } from '@instantdb/react';
 import { motion } from 'framer-motion';
+import ImageUploader from '@/components/admin/ImageUploader';
 
 export default function SiteSettingsPage() {
   const [status, setStatus] = useState('');
@@ -305,18 +306,15 @@ export default function SiteSettingsPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Open Graph Image URL
+                    Open Graph Image
                   </label>
-                  <input
-                    type="url"
+                  <ImageUploader
                     value={ogImage}
-                    onChange={(e) => setOgImage(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="https://example.com/og-image.jpg"
+                    onChange={setOgImage}
+                    storagePath="site/og"
+                    aspectRatio="16:9"
+                    placeholder="Upload OG image (1200x630px) or enter URL"
                   />
-                  <p className="mt-1 text-xs text-gray-500">
-                    Recommended: 1200x630px
-                  </p>
                 </div>
 
                 <div>

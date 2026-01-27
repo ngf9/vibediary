@@ -1,6 +1,6 @@
 export interface ContentSection {
   id: string;
-  type: 'heading' | 'paragraph' | 'list' | 'image' | 'code' | 'blockquote' | 'separator';
+  type: 'heading' | 'paragraph' | 'list' | 'image' | 'code' | 'blockquote' | 'separator' | 'video';
   content?: string;
   level?: number; // for headings
   src?: string; // for images
@@ -9,6 +9,9 @@ export interface ContentSection {
   items?: string[]; // for lists
   ordered?: boolean; // for lists
   language?: string; // for code blocks
+  videoId?: string; // for video embeds
+  platform?: 'youtube'; // for video embeds
+  videoUrl?: string; // original video URL
 }
 
 export interface ParsedContent {
@@ -204,6 +207,22 @@ export async function parseMarkdownToJson(markdown: string): Promise<ParsedConte
         type: 'list',
         ordered: true,
         items
+      });
+      continue;
+    }
+
+    // Handle YouTube video URLs (bare URL on its own line)
+    const youtubeMatch = trimmedLine.match(
+      /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:\S*)$/
+    );
+    if (youtubeMatch) {
+      flushParagraph();
+      sections.push({
+        id: createId(),
+        type: 'video',
+        videoId: youtubeMatch[1],
+        platform: 'youtube',
+        videoUrl: trimmedLine,
       });
       continue;
     }

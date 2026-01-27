@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { db } from '@/lib/instant';
 import { id } from '@instantdb/react';
 import { motion } from 'framer-motion';
+import ImageUploader from '@/components/admin/ImageUploader';
 
 export default function EditProjectPage() {
   const router = useRouter();
@@ -246,27 +247,27 @@ export default function EditProjectPage() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Thumbnail URL
+                    Thumbnail
                   </label>
-                  <input
-                    type="url"
+                  <ImageUploader
                     value={thumbnail}
-                    onChange={(e) => setThumbnail(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="https://example.com/thumbnail.jpg"
+                    onChange={setThumbnail}
+                    storagePath="projects/thumbnails"
+                    aspectRatio="16:9"
+                    placeholder="Upload thumbnail or enter URL"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Cover Image URL
+                    Cover Image
                   </label>
-                  <input
-                    type="url"
+                  <ImageUploader
                     value={coverImage}
-                    onChange={(e) => setCoverImage(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="https://example.com/cover.jpg"
+                    onChange={setCoverImage}
+                    storagePath="projects/covers"
+                    aspectRatio="16:9"
+                    placeholder="Upload cover image or enter URL"
                   />
                 </div>
 

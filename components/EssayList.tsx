@@ -36,7 +36,7 @@ export default function EssayList({ essays }: EssayListProps) {
   };
 
   return (
-    <div className="px-8 md:px-12 lg:px-16 py-16 relative">
+    <div className="px-8 md:px-16 lg:px-24 xl:px-32 pt-16 pb-32 relative">
       <div className="max-w-screen-2xl mx-auto relative">
         {/* Essay List Container */}
         <div className="lg:w-3/5">

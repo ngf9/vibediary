@@ -8,6 +8,7 @@ import { id } from '@instantdb/react';
 import { motion } from 'framer-motion';
 import dynamicImport from 'next/dynamic';
 import { parseMarkdownToJson } from '@/lib/markdown-parser';
+import ImageUploader from '@/components/admin/ImageUploader';
 
 // Force dynamic rendering for admin pages
 export const dynamic = 'force-dynamic';
@@ -337,32 +338,26 @@ const example = 'code';
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Thumbnail Image (Card Display)
                   </label>
-                  <input
-                    type="text"
+                  <ImageUploader
                     value={thumbnail}
-                    onChange={(e) => setThumbnail(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="/Inspirations1.png or https://example.com/thumbnail.jpg"
+                    onChange={setThumbnail}
+                    storagePath="essays/thumbnails"
+                    aspectRatio="16:9"
+                    placeholder="Upload thumbnail or enter URL"
                   />
-                  <p className="mt-1 text-xs text-gray-500">
-                    Image shown on homepage cards. Use relative path for public folder images.
-                  </p>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Hero Image (Essay Page)
                   </label>
-                  <input
-                    type="text"
+                  <ImageUploader
                     value={heroImage}
-                    onChange={(e) => setHeroImage(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="/inspirations2.png or https://example.com/hero.jpg"
+                    onChange={setHeroImage}
+                    storagePath="essays/heroes"
+                    aspectRatio="16:9"
+                    placeholder="Upload hero image or enter URL"
                   />
-                  <p className="mt-1 text-xs text-gray-500">
-                    Large image displayed on the essay page. Use relative path for public folder images.
-                  </p>
                 </div>
 
                 <div>

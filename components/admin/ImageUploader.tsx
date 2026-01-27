@@ -3,6 +3,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { Upload, X, Link, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { db } from '@/lib/instant';
 
 interface ImageUploaderProps {
   value?: string;
@@ -10,6 +11,7 @@ interface ImageUploaderProps {
   placeholder?: string;
   aspectRatio?: 'square' | '16:9' | '4:3' | 'free';
   maxSizeMB?: number;
+  storagePath?: string;
 }
 
 export default function ImageUploader({
@@ -17,12 +19,13 @@ export default function ImageUploader({
   onChange,
   placeholder = 'Enter image URL or upload file',
   aspectRatio = 'free',
-  maxSizeMB = 5
+  maxSizeMB = 5,
+  storagePath = 'uploads',
 }: ImageUploaderProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [inputMode, setInputMode] = useState<'url' | 'upload'>('url');
-  const [tempUrl, setTempUrl] = useState(value);
+  const [tempUrl, setTempUrl] = useState(value || '');
   const [previewError, setPreviewError] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -44,16 +47,15 @@ export default function ImageUploader({
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       handleFile(e.dataTransfer.files[0]);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleFile = async (file: File) => {
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       alert('Please upload an image file');
       return;
     }
 
-    // Validate file size
     const sizeMB = file.size / (1024 * 1024);
     if (sizeMB > maxSizeMB) {
       alert(`File size must be less than ${maxSizeMB}MB`);
@@ -63,32 +65,32 @@ export default function ImageUploader({
     setIsLoading(true);
 
     try {
-      // Create FormData for upload
-      const formData = new FormData();
-      formData.append('file', file);
+      const timestamp = Date.now();
+      const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const path = `${storagePath}/${timestamp}-${sanitizedName}`;
 
-      // For now, we'll use a data URL for preview
-      // In production, you'd upload to a server or cloud storage
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const dataUrl = reader.result as string;
-        onChange(dataUrl);
-        setTempUrl(dataUrl);
+      // Upload to InstantDB Storage
+      await db.storage.uploadFile(path, file);
+
+      // Query the uploaded file to get its URL
+      const result = await db.queryOnce({
+        $files: {
+          $: { where: { path } }
+        }
+      });
+
+      const uploadedUrl = result.data.$files?.[0]?.url;
+      if (uploadedUrl) {
+        onChange(uploadedUrl);
+        setTempUrl(uploadedUrl);
         setPreviewError(false);
-        setIsLoading(false);
-      };
-      reader.readAsDataURL(file);
-
-      // TODO: Implement actual file upload to server
-      // const response = await fetch('/api/upload', {
-      //   method: 'POST',
-      //   body: formData
-      // });
-      // const data = await response.json();
-      // onChange(data.url);
+      } else {
+        throw new Error('Upload succeeded but could not retrieve file URL');
+      }
     } catch (error) {
       console.error('Upload failed:', error);
-      alert('Failed to upload image');
+      alert('Failed to upload image. Please try again.');
+    } finally {
       setIsLoading(false);
     }
   };
@@ -99,7 +101,22 @@ export default function ImageUploader({
     setPreviewError(false);
   };
 
-  const handleClear = () => {
+  const handleClear = async () => {
+    // If the value is an InstantDB storage URL, delete the file
+    if (value && value.includes('instant-storage')) {
+      try {
+        const result = await db.queryOnce({
+          $files: { $: { where: { url: value } } }
+        });
+        const filePath = result.data.$files?.[0]?.path;
+        if (filePath) {
+          await db.storage.delete(filePath);
+        }
+      } catch (error) {
+        console.error('Failed to delete file from storage:', error);
+      }
+    }
+
     onChange('');
     setTempUrl('');
     setPreviewError(false);
@@ -150,7 +167,7 @@ export default function ImageUploader({
         <div className="flex gap-2">
           <input
             type="text"
-            value={tempUrl}
+            value={tempUrl || ''}
             onChange={(e) => handleUrlChange(e.target.value)}
             placeholder={placeholder}
             className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -183,6 +200,7 @@ export default function ImageUploader({
             accept="image/*"
             onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            disabled={isLoading}
           />
 
           <div className="text-center">
@@ -216,7 +234,7 @@ export default function ImageUploader({
               fill
               style={{ objectFit: 'contain' }}
               onError={() => setPreviewError(true)}
-              unoptimized={value.startsWith('data:')}
+              unoptimized
             />
           </div>
           <button

@@ -5,8 +5,8 @@ import { db } from '@/lib/instant';
 import { id } from '@instantdb/react';
 import { motion } from 'framer-motion';
 import dynamic from 'next/dynamic';
-import Image from 'next/image';
 import { parseMarkdownToJson } from '@/lib/markdown-parser';
+import ImageUploader from '@/components/admin/ImageUploader';
 
 // Dynamically import SimpleMarkdownEditor to avoid SSR issues
 const SimpleMarkdownEditor = dynamic(
@@ -19,13 +19,6 @@ interface JourneyItem {
   title: string;
   date: string;
   description: string;
-}
-
-interface AboutSection {
-  id?: string;
-  title?: string;
-  content?: string;
-  type?: string;
 }
 
 export default function AdminAboutPage() {
@@ -238,31 +231,13 @@ export default function AdminAboutPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Profile Image
                   </label>
-                  <div className="space-y-3">
-                    <input
-                      type="text"
-                      value={profileImage}
-                      onChange={(e) => setProfileImage(e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      placeholder="Image URL (e.g., /profile.jpg or https://...)"
-                    />
-                    {profileImage && (
-                      <div className="flex items-center gap-4">
-                        <div className="relative w-32 h-32">
-                          <Image
-                            src={profileImage}
-                            alt="Profile preview"
-                            fill
-                            className="rounded-lg object-cover border border-gray-200"
-                            unoptimized={profileImage.startsWith('data:')}
-                          />
-                        </div>
-                        <p className="text-sm text-gray-500">
-                          Preview of your profile image
-                        </p>
-                      </div>
-                    )}
-                  </div>
+                  <ImageUploader
+                    value={profileImage}
+                    onChange={setProfileImage}
+                    storagePath="about/profile"
+                    aspectRatio="square"
+                    placeholder="Upload profile image or enter URL"
+                  />
                 </div>
 
                 <div>
@@ -314,31 +289,13 @@ You can use **bold**, *italic*, lists, and more!"
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Timeline Section Image
                   </label>
-                  <div className="space-y-3">
-                    <input
-                      type="text"
-                      value={timelineImage}
-                      onChange={(e) => setTimelineImage(e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      placeholder="Image URL (e.g., /artofconversation.png or https://...)"
-                    />
-                    {timelineImage && (
-                      <div className="flex items-center gap-4">
-                        <div className="relative w-48 h-32">
-                          <Image
-                            src={timelineImage}
-                            alt="Timeline preview"
-                            fill
-                            className="rounded-lg object-cover border border-gray-200"
-                            unoptimized={timelineImage.startsWith('data:')}
-                          />
-                        </div>
-                        <p className="text-sm text-gray-500">
-                          Preview of your timeline image
-                        </p>
-                      </div>
-                    )}
-                  </div>
+                  <ImageUploader
+                    value={timelineImage}
+                    onChange={setTimelineImage}
+                    storagePath="about/timeline"
+                    aspectRatio="16:9"
+                    placeholder="Upload timeline image or enter URL"
+                  />
                   <p className="mt-2 text-xs text-gray-500">
                     This image appears next to your journey timeline on the about page
                   </p>
