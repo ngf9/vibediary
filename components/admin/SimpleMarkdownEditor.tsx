@@ -111,7 +111,8 @@ export default function SimpleMarkdownEditor({
 
       if (url) {
         const altText = file.name.replace(/\.[^/.]+$/, '');
-        insertImage(url, altText);
+        // Store the stable path instead of the ephemeral URL
+        insertImage(path, altText);
       }
     } catch (error) {
       console.error('Upload failed:', error);
@@ -305,7 +306,8 @@ export default function SimpleMarkdownEditor({
                       type="button"
                       onClick={() => {
                         const name = file.path?.split('/').pop()?.replace(/^\d+-/, '') || 'Image';
-                        insertImage(file.url, name);
+                        // Store the stable path, not the ephemeral URL
+                        insertImage(file.path, name);
                       }}
                       className="group relative aspect-square border border-gray-200 rounded overflow-hidden hover:border-purple-500 transition-colors"
                       title={file.path}

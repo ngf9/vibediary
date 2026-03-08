@@ -1,9 +1,15 @@
 'use client';
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import Image from 'next/image';
 import { Upload, X, Link, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { db } from '@/lib/instant';
+
+/** Returns true if a string is an InstantDB storage path (not a URL or local path). */
+function isStoragePath(value: string): boolean {
+  if (!value) return false;
+  return !value.startsWith('http') && !value.startsWith('/');
+}
 
 interface ImageUploaderProps {
   value?: string;
@@ -27,7 +33,30 @@ export default function ImageUploader({
   const [inputMode, setInputMode] = useState<'url' | 'upload'>('url');
   const [tempUrl, setTempUrl] = useState(value || '');
   const [previewError, setPreviewError] = useState(false);
+  const [resolvedPreviewUrl, setResolvedPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Resolve storage paths to fresh URLs for preview
+  useEffect(() => {
+    if (value && isStoragePath(value)) {
+      setResolvedPreviewUrl(null);
+      db.queryOnce({
+        $files: { $: { where: { path: value } } }
+      }).then(result => {
+        const url = result.data.$files?.[0]?.url;
+        if (url) {
+          setResolvedPreviewUrl(url);
+          setPreviewError(false);
+        } else {
+          setPreviewError(true);
+        }
+      }).catch(() => {
+        setPreviewError(true);
+      });
+    } else {
+      setResolvedPreviewUrl(null);
+    }
+  }, [value]);
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -72,21 +101,10 @@ export default function ImageUploader({
       // Upload to InstantDB Storage
       await db.storage.uploadFile(path, file);
 
-      // Query the uploaded file to get its URL
-      const result = await db.queryOnce({
-        $files: {
-          $: { where: { path } }
-        }
-      });
-
-      const uploadedUrl = result.data.$files?.[0]?.url;
-      if (uploadedUrl) {
-        onChange(uploadedUrl);
-        setTempUrl(uploadedUrl);
-        setPreviewError(false);
-      } else {
-        throw new Error('Upload succeeded but could not retrieve file URL');
-      }
+      // Store the stable path instead of the ephemeral URL
+      onChange(path);
+      setTempUrl(path);
+      setPreviewError(false);
     } catch (error) {
       console.error('Upload failed:', error);
       alert('Failed to upload image. Please try again.');
@@ -102,15 +120,20 @@ export default function ImageUploader({
   };
 
   const handleClear = async () => {
-    // If the value is an InstantDB storage URL, delete the file
-    if (value && value.includes('instant-storage')) {
+    if (value) {
       try {
-        const result = await db.queryOnce({
-          $files: { $: { where: { url: value } } }
-        });
-        const filePath = result.data.$files?.[0]?.path;
-        if (filePath) {
-          await db.storage.delete(filePath);
+        if (isStoragePath(value)) {
+          // Value is a storage path - delete directly
+          await db.storage.delete(value);
+        } else if (value.includes('instant-storage')) {
+          // Legacy: value is an S3 URL - try to look up file by URL
+          const result = await db.queryOnce({
+            $files: { $: { where: { url: value } } }
+          });
+          const filePath = result.data.$files?.[0]?.path;
+          if (filePath) {
+            await db.storage.delete(filePath);
+          }
         }
       } catch (error) {
         console.error('Failed to delete file from storage:', error);
@@ -120,6 +143,7 @@ export default function ImageUploader({
     onChange('');
     setTempUrl('');
     setPreviewError(false);
+    setResolvedPreviewUrl(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -131,6 +155,11 @@ export default function ImageUploader({
     '4:3': 'aspect-4/3',
     free: 'aspect-auto'
   };
+
+  // Determine which URL to use for the preview image
+  const previewUrl = value
+    ? (isStoragePath(value) ? resolvedPreviewUrl : value)
+    : null;
 
   return (
     <div className="space-y-4">
@@ -225,11 +254,11 @@ export default function ImageUploader({
       )}
 
       {/* Preview */}
-      {value && !previewError && (
+      {value && previewUrl && !previewError && (
         <div className="relative">
           <div className={`relative bg-gray-100 rounded-lg overflow-hidden ${aspectRatioClasses[aspectRatio]}`}>
             <Image
-              src={value}
+              src={previewUrl}
               alt="Preview"
               fill
               style={{ objectFit: 'contain' }}
@@ -244,6 +273,14 @@ export default function ImageUploader({
           >
             <X className="w-4 h-4" />
           </button>
+        </div>
+      )}
+
+      {/* Loading state for storage path resolution */}
+      {value && isStoragePath(value) && !resolvedPreviewUrl && !previewError && (
+        <div className="flex items-center justify-center p-4 bg-gray-50 rounded-lg">
+          <Loader2 className="w-5 h-5 animate-spin text-purple-600 mr-2" />
+          <span className="text-sm text-gray-600">Loading preview...</span>
         </div>
       )}
 
