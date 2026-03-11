@@ -8,6 +8,7 @@ export interface ContentSection {
   caption?: string; // for images
   items?: string[]; // for lists
   ordered?: boolean; // for lists
+  startNumber?: number; // for ordered lists — the number of the first item
   language?: string; // for code blocks
   videoId?: string; // for video embeds
   platform?: 'youtube'; // for video embeds
@@ -192,8 +193,10 @@ export async function parseMarkdownToJson(markdown: string): Promise<ParsedConte
     }
 
     // Handle ordered lists
-    if (trimmedLine.match(/^\d+\.\s+/)) {
+    const orderedMatch = trimmedLine.match(/^(\d+)\.\s+/);
+    if (orderedMatch) {
       flushParagraph();
+      const startNumber = parseInt(orderedMatch[1], 10);
       const items: string[] = [trimmedLine.replace(/^\d+\.\s+/, '')];
 
       // Collect all consecutive list items
@@ -206,6 +209,7 @@ export async function parseMarkdownToJson(markdown: string): Promise<ParsedConte
         id: createId(),
         type: 'list',
         ordered: true,
+        startNumber,
         items
       });
       continue;

@@ -12,6 +12,34 @@ interface JsonContentRendererProps {
   inView?: boolean;
 }
 
+const sharedComponents = {
+  a: ({ href, children }: any) => (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-[#5433FF] underline underline-offset-2 decoration-[#5433FF]/40 hover:decoration-[#5433FF] transition-colors"
+    >
+      {children}
+    </a>
+  ),
+  strong: ({ children }: any) => <strong className="font-semibold text-gray-900">{children}</strong>,
+  code: ({ children }: any) => (
+    <code className="text-[#5433FF] bg-purple-50 px-1.5 py-0.5 rounded text-[0.85em] font-mono">{children}</code>
+  ),
+};
+
+function InlineMarkdown({ content }: { content: string }) {
+  return (
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      components={{ ...sharedComponents, p: ({ children }) => <>{children}</> }}
+    >
+      {content}
+    </ReactMarkdown>
+  );
+}
+
 export default function JsonContentRenderer({ sections, inView = true }: JsonContentRendererProps) {
   const renderSection = (section: ContentSection, index: number) => {
     const baseDelay = 0.1 + index * 0.02;
@@ -68,9 +96,12 @@ export default function JsonContentRenderer({ sections, inView = true }: JsonCon
             initial={{ opacity: 0, y: 20 }}
             animate={inView ? { opacity: 1, y: 0 } : { opacity: 0 }}
             transition={{ duration: 0.5, delay: baseDelay }}
-            className="prose prose-sm sm:prose-base lg:prose-lg max-w-none mb-4 sm:mb-6"
+            className="prose prose-sm sm:prose-base lg:prose-lg max-w-none mb-4 sm:mb-6
+  prose-a:text-[#5433FF] prose-a:underline prose-a:underline-offset-2
+  prose-strong:text-gray-900 prose-code:text-[#5433FF] prose-code:bg-purple-50
+  prose-code:rounded prose-code:px-1"
           >
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            <ReactMarkdown remarkPlugins={[remarkGfm]} components={sharedComponents}>
               {section.content || ''}
             </ReactMarkdown>
           </motion.div>
@@ -112,15 +143,15 @@ export default function JsonContentRenderer({ sections, inView = true }: JsonCon
             className="mb-6 sm:mb-8"
           >
             {section.ordered ? (
-              <ol className="space-y-2 text-sm sm:text-base text-gray-700 list-decimal list-inside pl-1">
+              <ol style={{ marginLeft: '1.25rem', paddingLeft: '0.75rem' }} className="space-y-2.5 text-sm sm:text-base lg:text-[1.0625rem] text-gray-700 list-decimal list-outside leading-relaxed mb-6 sm:mb-8">
                 {section.items?.map((item, i) => (
-                  <li key={i} className="leading-relaxed">{item}</li>
+                  <li key={i} value={(section.startNumber ?? 1) + i} className="leading-relaxed"><InlineMarkdown content={item} /></li>
                 ))}
               </ol>
             ) : (
-              <ul className="space-y-2 text-sm sm:text-base text-gray-700 list-disc list-inside pl-1">
+              <ul style={{ marginLeft: '1.25rem', paddingLeft: '0.75rem' }} className="space-y-2.5 text-sm sm:text-base lg:text-[1.0625rem] text-gray-700 list-disc list-outside leading-relaxed mb-6 sm:mb-8">
                 {section.items?.map((item, i) => (
-                  <li key={i} className="leading-relaxed">{item}</li>
+                  <li key={i} className="leading-relaxed"><InlineMarkdown content={item} /></li>
                 ))}
               </ul>
             )}
@@ -151,9 +182,10 @@ export default function JsonContentRenderer({ sections, inView = true }: JsonCon
             initial={{ opacity: 0, x: -20 }}
             animate={inView ? { opacity: 1, x: 0 } : { opacity: 0 }}
             transition={{ duration: 0.5, delay: baseDelay }}
-            className="border-l-3 sm:border-l-4 border-purple-500 pl-3 sm:pl-4 py-2 my-4 sm:my-6 italic text-sm sm:text-base text-gray-600"
+            style={{ marginTop: '1.5rem', marginBottom: '2.5rem' }}
+            className="border-l-4 border-[#5433FF]/40 pl-4 sm:pl-6 py-3 bg-purple-50/30 rounded-r-lg text-gray-600 text-sm sm:text-base italic"
           >
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            <ReactMarkdown remarkPlugins={[remarkGfm]} components={sharedComponents}>
               {section.content || ''}
             </ReactMarkdown>
           </motion.blockquote>
