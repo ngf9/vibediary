@@ -26,9 +26,34 @@ export async function generateMetadata({ params }: PageProps) {
     };
   }
 
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://vibediary.dev';
+  const ogImage = essay.heroImage
+    ? essay.heroImage.startsWith('http')
+      ? essay.heroImage
+      : `${baseUrl}${essay.heroImage}`
+    : essay.thumbnail
+    ? essay.thumbnail.startsWith('http')
+      ? essay.thumbnail
+      : `${baseUrl}${essay.thumbnail}`
+    : null;
+
   return {
     title: `${essay.title} | Diary of a Vibe Coder`,
     description: essay.excerpt || 'Read this essay on Diary of a Vibe Coder',
+    openGraph: {
+      title: essay.title,
+      description: essay.excerpt || 'Read this essay on Diary of a Vibe Coder',
+      url: `${baseUrl}/essays/${essay.slug}`,
+      siteName: 'Diary of a Vibe Coder',
+      ...(ogImage && { images: [{ url: ogImage, width: 1200, height: 630, alt: essay.title }] }),
+      type: 'article',
+    },
+    twitter: {
+      card: ogImage ? 'summary_large_image' : 'summary',
+      title: essay.title,
+      description: essay.excerpt || 'Read this essay on Diary of a Vibe Coder',
+      ...(ogImage && { images: [ogImage] }),
+    },
   };
 }
 
