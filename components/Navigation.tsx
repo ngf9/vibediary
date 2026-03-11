@@ -28,7 +28,7 @@ export default function Navigation({ essays = [] }: NavigationProps) {
 
 
   const navigationTabs = [
-    { id: 'about', label: 'About', href: '/about' },
+    { id: 'about', label: 'About', href: 'https://ngf.is' },
   ];
 
   // Close dropdown when clicking outside
@@ -45,7 +45,11 @@ export default function Navigation({ essays = [] }: NavigationProps) {
 
   const handleNavClick = (href: string) => {
     if (href !== '#') {
-      router.push(href);
+      if (href.startsWith('http')) {
+        window.open(href, '_blank');
+      } else {
+        router.push(href);
+      }
       setIsMobileMenuOpen(false);
       setIsDropdownOpen(false);
     }
