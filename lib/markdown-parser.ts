@@ -13,6 +13,8 @@ export interface ContentSection {
   videoId?: string; // for video embeds
   platform?: 'youtube'; // for video embeds
   videoUrl?: string; // original video URL
+  indent?: boolean; // visually nest this section under the preceding list item
+  size?: 'small' | 'medium' | 'full'; // optional width hint for images (default: full)
 }
 
 export interface ParsedContent {
@@ -141,6 +143,18 @@ export async function parseMarkdownToJson(markdown: string): Promise<ParsedConte
           caption = captionMatch[1];
           i++; // Skip the caption line
         }
+      }
+
+      // Local video files referenced with image syntax render as HTML5 video
+      if (/\.(mp4|webm|ogg|mov|m4v)$/i.test(src)) {
+        sections.push({
+          id: createId(),
+          type: 'video',
+          src,
+          alt,
+          caption
+        });
+        continue;
       }
 
       sections.push({

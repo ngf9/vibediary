@@ -40,6 +40,12 @@ function InlineMarkdown({ content }: { content: string }) {
   );
 }
 
+const cx = (...classes: Array<string | false | undefined>) => classes.filter(Boolean).join(' ');
+
+// Indentation applied to sections nested under a numbered list item, so they
+// visually read as belonging to that point. Roughly aligns under the item text.
+const INDENT = 'ml-7 sm:ml-9';
+
 export default function JsonContentRenderer({ sections, inView = true }: JsonContentRendererProps) {
   const renderSection = (section: ContentSection, index: number) => {
     const baseDelay = 0.1 + index * 0.02;
@@ -96,10 +102,13 @@ export default function JsonContentRenderer({ sections, inView = true }: JsonCon
             initial={{ opacity: 0, y: 20 }}
             animate={inView ? { opacity: 1, y: 0 } : { opacity: 0 }}
             transition={{ duration: 0.5, delay: baseDelay }}
-            className="prose prose-sm sm:prose-base lg:prose-lg max-w-none mb-4 sm:mb-6
+            className={cx(
+              `prose prose-sm sm:prose-base lg:prose-lg max-w-none mb-4 sm:mb-6
   prose-a:text-[#5433FF] prose-a:underline prose-a:underline-offset-2
   prose-strong:text-gray-900 prose-code:text-[#5433FF] prose-code:bg-purple-50
-  prose-code:rounded prose-code:px-1"
+  prose-code:rounded prose-code:px-1`,
+              section.indent && cx(INDENT, 'mt-1')
+            )}
           >
             <ReactMarkdown remarkPlugins={[remarkGfm]} components={sharedComponents}>
               {section.content || ''}
@@ -107,14 +116,25 @@ export default function JsonContentRenderer({ sections, inView = true }: JsonCon
           </motion.div>
         );
 
-      case 'image':
+      case 'image': {
+        const isIndent = !!section.indent;
+        const sizeClass =
+          section.size === 'small'
+            ? 'max-w-xs sm:max-w-sm'
+            : section.size === 'medium'
+              ? 'max-w-md sm:max-w-xl'
+              : '';
         return (
           <motion.figure
             key={section.id}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={inView ? { opacity: 1, scale: 1 } : { opacity: 0 }}
             transition={{ duration: 0.6, delay: baseDelay }}
-            className="mt-4 mb-8 sm:mt-6 sm:mb-10 lg:mt-8 lg:mb-12 -mx-4 sm:mx-0"
+            className={cx(
+              isIndent ? 'mt-2 mb-6 sm:mt-3 sm:mb-8' : 'mt-4 mb-8 sm:mt-6 sm:mb-10 lg:mt-8 lg:mb-12',
+              isIndent ? INDENT : sizeClass ? 'mx-0' : '-mx-4 sm:mx-0',
+              sizeClass
+            )}
           >
             <Image
               src={section.src || ''}
@@ -126,12 +146,13 @@ export default function JsonContentRenderer({ sections, inView = true }: JsonCon
               unoptimized={section.src?.startsWith('data:')}
             />
             {section.caption && (
-              <figcaption className="text-center text-xs sm:text-sm text-gray-600 mt-2 italic px-4 sm:px-0">
+              <figcaption className={cx('text-xs sm:text-sm text-gray-600 mt-2 italic', isIndent ? 'text-left' : 'text-center px-4 sm:px-0')}>
                 {section.caption}
               </figcaption>
             )}
           </motion.figure>
         );
+      }
 
       case 'list':
         return (
@@ -202,30 +223,65 @@ export default function JsonContentRenderer({ sections, inView = true }: JsonCon
           />
         );
 
-      case 'video':
-        return (
-          <motion.div
-            key={section.id}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={inView ? { opacity: 1, scale: 1 } : { opacity: 0 }}
-            transition={{ duration: 0.6, delay: baseDelay }}
-            className="my-6 sm:my-8 lg:my-10 -mx-4 sm:mx-0"
-          >
-            <div
-              className="relative w-full overflow-hidden rounded-none sm:rounded-lg shadow-md sm:shadow-lg"
-              style={{ paddingBottom: '56.25%' }}
+      case 'video': {
+        if (section.videoId) {
+          return (
+            <motion.div
+              key={section.id}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={inView ? { opacity: 1, scale: 1 } : { opacity: 0 }}
+              transition={{ duration: 0.6, delay: baseDelay }}
+              className="my-6 sm:my-8 lg:my-10 -mx-4 sm:mx-0"
             >
-              <iframe
-                src={`https://www.youtube.com/embed/${section.videoId}`}
-                title="YouTube video"
-                className="absolute top-0 left-0 w-full h-full"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
+              <div
+                className="relative w-full overflow-hidden rounded-none sm:rounded-lg shadow-md sm:shadow-lg"
+                style={{ paddingBottom: '56.25%' }}
+              >
+                <iframe
+                  src={`https://www.youtube.com/embed/${section.videoId}`}
+                  title="YouTube video"
+                  className="absolute top-0 left-0 w-full h-full"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            </motion.div>
+          );
+        }
+        if (section.src) {
+          const isIndent = !!section.indent;
+          const sizeClass =
+            section.size === 'small' ? 'max-w-sm' : section.size === 'medium' ? 'max-w-2xl' : '';
+          return (
+            <motion.figure
+              key={section.id}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={inView ? { opacity: 1, scale: 1 } : { opacity: 0 }}
+              transition={{ duration: 0.6, delay: baseDelay }}
+              className={cx(
+                isIndent ? 'mt-2 mb-6 sm:mt-3 sm:mb-8' : 'mt-4 mb-8 sm:mt-6 sm:mb-10 lg:mt-8 lg:mb-12',
+                isIndent ? INDENT : sizeClass ? 'mx-auto' : '-mx-4 sm:mx-0',
+                sizeClass
+              )}
+            >
+              <video
+                src={section.src}
+                controls
+                playsInline
+                preload="metadata"
+                className="mx-auto h-auto w-auto max-h-[520px] max-w-full rounded-none sm:rounded-lg shadow-md sm:shadow-lg"
               />
-            </div>
-          </motion.div>
-        );
+              {section.caption && (
+                <figcaption className={cx('text-xs sm:text-sm text-gray-600 mt-2 italic', isIndent ? 'text-left' : 'text-center px-4 sm:px-0')}>
+                  {section.caption}
+                </figcaption>
+              )}
+            </motion.figure>
+          );
+        }
+        return null;
+      }
 
       default:
         return null;
