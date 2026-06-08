@@ -96,6 +96,20 @@ export default function JsonContentRenderer({ sections, inView = true }: JsonCon
         );
 
       case 'paragraph':
+        // Emphasized labels render like the numbered headers (text-2xl→4xl, bold).
+        if (section.emphasis) {
+          return (
+            <motion.p
+              key={section.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={inView ? { opacity: 1, y: 0 } : { opacity: 0 }}
+              transition={{ duration: 0.5, delay: baseDelay }}
+              className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 leading-tight mt-8 sm:mt-10 mb-3 sm:mb-4"
+            >
+              {section.content}
+            </motion.p>
+          );
+        }
         return (
           <motion.div
             key={section.id}

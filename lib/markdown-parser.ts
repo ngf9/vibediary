@@ -15,6 +15,7 @@ export interface ContentSection {
   videoUrl?: string; // original video URL
   indent?: boolean; // visually nest this section under the preceding list item
   size?: 'small' | 'medium' | 'full'; // optional width hint for images (default: full)
+  emphasis?: boolean; // render a paragraph as a slightly larger emphasized label
 }
 
 export interface ParsedContent {
